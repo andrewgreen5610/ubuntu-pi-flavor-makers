@@ -58,7 +58,7 @@ function sync_to() {
 function bootstrap() {
     # Required tools
     apt-get -y install binfmt-support debootstrap f2fs-tools \
-    qemu-user-static rsync ubuntu-keyring whois
+    pxz qemu-user-static rsync ubuntu-keyring whois xz
 
     # Use the same base system for all flavours.
     if [ ! -f "${R}/tmp/.bootstrap" ]; then
@@ -603,7 +603,7 @@ function make_tarball() {
 function compress_image() {
     if [ ! -e "${BASEDIR}/${IMAGE}.xz" ]; then
         echo "Compressing to: ${BASEDIR}/${IMAGE}.xz"
-        xz ${BASEDIR}/${IMAGE}
+        pxz ${BASEDIR}/${IMAGE}
     fi
     make_hash "${BASEDIR}/${IMAGE}.xz"
 }
