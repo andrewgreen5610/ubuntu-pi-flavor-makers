@@ -21,7 +21,7 @@
 
 set -ex
 
-DEST="man"
+DEST="yor"
 
 if [ -f build-settings.sh ]; then
     source build-settings.sh
