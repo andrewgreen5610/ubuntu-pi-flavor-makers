@@ -350,9 +350,8 @@ function configure_hardware() {
 
     # Set up fstab
     cat <<EOM >$R/etc/fstab
-proc            /proc           proc    defaults          0       0
-/dev/mmcblk0p2  /               ${FS}   defaults,noatime  0       1
-/dev/mmcblk0p1  /boot/          vfat    defaults          0       2
+LABEL=writable      /               ${FS}   defaults,noatime    0   0
+LABEL=system-boot   /boot/firmware  vfat    defaults            0   1
 EOM
 }
 
@@ -494,7 +493,7 @@ function make_raspi2_image() {
     # Build the image file
     local FS="${1}"
     local SIZE_IMG="${2}"
-    local SIZE_BOOT="256MiB"
+    local SIZE_BOOT="250MiB"
 
     if [ "${FS}" != "ext4" ] && [ "${FS}" != 'f2fs' ]; then
         echo "ERROR! Unsupport filesystem requested. Exitting."
@@ -531,21 +530,21 @@ function make_raspi2_image() {
     echo "/boot: offset ${BOOT_OFFSET}, length ${BOOT_LENGTH}"
     echo "/:     offset ${ROOT_OFFSET}, length ${ROOT_LENGTH}"
 
-    mkfs.vfat -n PI_BOOT -S 512 -s 16 -v "${BOOT_LOOP}"
+    mkfs.vfat -n system-boot -S 512 -s 16 -v "${BOOT_LOOP}"
     if [ "${FS}" == "ext4" ]; then
-        mkfs.ext4 -L PI_ROOT -m 0 -O ^huge_file "${ROOT_LOOP}"
+        mkfs.ext4 -L writable -m 0 -O ^huge_file "${ROOT_LOOP}"
     else
-        mkfs.f2fs -l PI_ROOT -o 1 "${ROOT_LOOP}"
+        mkfs.f2fs -l writable -o 1 "${ROOT_LOOP}"
     fi
 
     MOUNTDIR="${BUILDDIR}/mount"
     mkdir -p "${MOUNTDIR}"
     mount -v "${ROOT_LOOP}" "${MOUNTDIR}" -t "${FS}"
-    mkdir -p "${MOUNTDIR}/boot"
-    mount -v "${BOOT_LOOP}" "${MOUNTDIR}/boot" -t vfat
+    mkdir -p "${MOUNTDIR}/boot/firmware"
+    mount -v "${BOOT_LOOP}" "${MOUNTDIR}/boot/firmware" -t vfat
     rsync -aHAXx "$R/" "${MOUNTDIR}/"
     sync
-    umount -l "${MOUNTDIR}/boot"
+    umount -l "${MOUNTDIR}/boot/firmware"
     umount -l "${MOUNTDIR}"
     losetup -d "${ROOT_LOOP}"
     losetup -d "${BOOT_LOOP}"
