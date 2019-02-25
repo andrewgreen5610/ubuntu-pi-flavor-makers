@@ -135,18 +135,20 @@ function install_meta() {
         local RECOMMENDS=""
     fi
 
+    chroot $R apt-get -y install ${RECOMMENDS} ${META}^
+
     cat <<EOM >$R/usr/local/bin/${1}.sh
-#!/bin/bash
+#!/usr/bin/env bash
 service dbus start
 apt-get -f install
 dpkg --configure -a
-apt-get -y install ${RECOMMENDS} ${META}^
 service dbus stop
 EOM
+
     chmod +x $R/usr/local/bin/${1}.sh
     chroot $R /usr/local/bin/${1}.sh
-
     rm $R/usr/local/bin/${1}.sh
+
 
     if [ "${RECOMMENDS}" == "--no-install-recommends" ]; then
         rm $R/etc/apt/apt.conf.d/99noinstallrecommends
