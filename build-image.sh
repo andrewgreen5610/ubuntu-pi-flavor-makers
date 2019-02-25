@@ -2,7 +2,7 @@
 
 ########################################################################
 #
-# Copyright (C) 2015 - 2017 Martin Wimpress <code@ubuntu-mate.org>
+# Copyright (C) 2015 - 2019 Martin Wimpress <code@ubuntu-mate.org>
 # Copyright (C) 2015 Rohith Madhavan <rohithmadhavan@gmail.com>
 # Copyright (C) 2015 Ryan Finnie <ryan@finnie.org>
 #
