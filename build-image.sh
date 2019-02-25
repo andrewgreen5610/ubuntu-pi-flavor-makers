@@ -225,32 +225,6 @@ ff02::2         ip6-allrouters
 
 127.0.1.1       ${FLAVOUR}
 EOM
-
-    # Set up interfaces
-    if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ "${FLAVOUR}" != "ubuntu-standard" ]; then
-        cat <<EOM >$R/etc/network/interfaces
-# interfaces(5) file used by ifup(8) and ifdown(8)
-# Include files from /etc/network/interfaces.d:
-source-directory /etc/network/interfaces.d
-
-# The loopback network interface
-auto lo
-iface lo inet loopback
-EOM
-    else
-        cat <<EOM >$R/etc/network/interfaces
-# interfaces(5) file used by ifup(8) and ifdown(8)
-# Include files from /etc/network/interfaces.d:
-source-directory /etc/network/interfaces.d
-
-# The loopback network interface
-auto lo
-iface lo inet loopback
-
-auto eth0
-iface eth0 inet dhcp
-EOM
-    fi
 }
 
 function disable_services() {
