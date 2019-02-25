@@ -10,7 +10,7 @@
 #
 ########################################################################
 
-set -ex
+set -x
 
 if [ -f build-settings.sh ]; then
     source build-settings.sh
