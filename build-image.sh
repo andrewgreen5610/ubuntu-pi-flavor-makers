@@ -7,7 +7,7 @@
 # Copyright (C) 2015 Ryan Finnie <ryan@finnie.org>
 #
 # See the included LICENSE file.
-# 
+#
 ########################################################################
 
 set -ex
@@ -34,7 +34,7 @@ function mount_system() {
     mount -t sysfs none $R/sys
     mount -o bind /dev $R/dev
     mount -o bind /dev/pts $R/dev/pts
-    echo "nameserver 8.8.8.8" > $R/etc/resolv.conf
+    echo "nameserver 1.1.1.1" > $R/etc/resolv.conf
 }
 
 # Unmount host system
@@ -356,7 +356,7 @@ function configure_hardware() {
         # Add the first boot filesystem resize, init_resize.sh is
         # shipped in raspi-config.
         cp files/resize2fs_once	$R/etc/init.d/
-        chroot $R /bin/systemctl enable resize2fs_once        
+        chroot $R /bin/systemctl enable resize2fs_once
     else
         CMDLINE_INIT=""
     fi
@@ -518,7 +518,7 @@ function make_raspi2_image() {
     # Build the image file
     local FS="${1}"
     local SIZE_IMG="${2}"
-    local SIZE_BOOT="64MiB"
+    local SIZE_BOOT="256MiB"
 
     if [ "${FS}" != "ext4" ] && [ "${FS}" != 'f2fs' ]; then
         echo "ERROR! Unsupport filesystem requested. Exitting."
