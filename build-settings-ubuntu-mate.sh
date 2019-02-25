@@ -21,8 +21,8 @@
 
 FLAVOUR="ubuntu-mate"
 FLAVOUR_NAME="Ubuntu MATE"
-RELEASE="xenial"
-VERSION="16.04.2"
+RELEASE="bionic"
+VERSION="18.04.2"
 QUALITY=""
 
 # Either 'ext4' or 'f2fs'
