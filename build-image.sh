@@ -279,17 +279,37 @@ function configure_hardware() {
     fi
 
     # Install the RPi PPA
-    chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/ppa
-    chroot $R apt-get update
+    if [ "${RELEASE}" == "xenial" ]; then
+      chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/ppa
+      chroot $R apt-get -y update
+    fi
 
     # Firmware Kernel installation
-    chroot $R apt-get -y install libraspberrypi-bin libraspberrypi-dev \
-    libraspberrypi-doc libraspberrypi0 raspberrypi-bootloader rpi-update \
-    bluez-firmware linux-firmware pi-bluetooth
+    if [ "${RELEASE}" == "bionic" ]; then
+      mkdir -p $R/boot/firmware
+      chroot $R apt-get -y --no-install-recommends install linux-image-raspi2
 
-    # Raspberry Pi 3 WiFi firmware. Supplements what is provided in linux-firmware
-    cp -v firmware/* $R/lib/firmware/brcm/
-    chown root:root $R/lib/firmware/brcm/*
+      # Install flash-kernel last so it doesn't try (and fail) to detect the
+      # platform in the chroot.
+      chroot $R apt-get -y install flash-kernel
+      VMLINUZ="$(ls -1 $R/boot/vmlinuz-* | sort | tail -n 1)"
+      #[ -z "$VMLINUZ" ] && exit 1
+      cp "${VMLINUZ}" $R/boot/firmware/vmlinuz
+      INITRD="$(ls -1 $R/boot/initrd.img-* | sort | tail -n 1)"
+      #[ -z "$INITRD" ] && exit 1
+      cp "${INITRD}" $R/boot/firmware/initrd.img
+
+      chroot $R apt-get -y install linux-firmware-raspi2 u-boot-rpi
+      rsync -av $R/lib/firmware/4.*-raspi2/device-tree/ $R/boot/firmware/
+    elif [ "${RELEASE}" == "xenial" ]; then
+      chroot $R apt-get -y install libraspberrypi-bin libraspberrypi-dev \
+      libraspberrypi-doc libraspberrypi0 raspberrypi-bootloader rpi-update \
+      bluez-firmware linux-firmware pi-bluetooth
+
+      # Raspberry Pi 3 WiFi firmware. Supplements what is provided in linux-firmware
+      cp -v firmware/* $R/lib/firmware/brcm/
+      chown root:root $R/lib/firmware/brcm/*
+    fi
 
     # pi-top poweroff and brightness utilities
     cp -v files/pi-top-* $R/usr/bin/
@@ -339,13 +359,23 @@ function configure_hardware() {
     chroot $R apt-get -y install raspi-config
 
     # Add /boot/config.txt
-    cp files/config.txt $R/boot/
+    if [ "${RELEASE}" == "bionic" ]; then
+        cp files/config.txt $R/boot/firmware/
+        sed -i 's/#kernel=""/kernel=vmlinuz/' $R/boot/firmware/config.txt
+        sed -i 's/#initramfs initramf.gz 0x00800000/initramfs initrd.img followkernel/' $R/boot/firmware/config.txt
+    elif [ "${RELEASE}" == "xenial" ]; then
+        cp files/config.txt $R/boot/
+    fi
 
     # Add /boot/cmdline.txt
-    echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles ${CMDLINE_INIT}" > $R/boot/cmdline.txt
-    # Enable VC4 on composited desktops
-    if [ "${FLAVOUR}" == "kubuntu" ] || [ "${FLAVOUR}" == "ubuntu" ] || [ "${FLAVOUR}" == "ubuntu-gnome" ]; then
+    if [ "${RELEASE}" == "bionic" ]; then
+      echo "net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles ${CMDLINE_INIT}" > $R/boot/firmware/cmdline.txt
+    elif [ "${RELEASE}" == "xenial" ]; then
+      echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles ${CMDLINE_INIT}" > $R/boot/cmdline.txt
+      # Enable VC4 on composited desktops
+      if [ "${FLAVOUR}" == "kubuntu" ] || [ "${FLAVOUR}" == "ubuntu" ] || [ "${FLAVOUR}" == "ubuntu-gnome" ]; then
         echo "dtoverlay=vc4-kms-v3d" >> $R/boot/config.txt
+      fi
     fi
 
     # Set up fstab
