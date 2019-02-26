@@ -437,8 +437,8 @@ function install_software() {
 
         # Scratch (nuscratch)
         # - Requires: scratch and used to require wiringpi
-        cp deb/scratch_1.4.20131203-2_all.deb $R/tmp/wiringpi.deb
-        cp deb/wiringpi_2.32_armhf.deb $R/tmp/scratch.deb
+        cp deb/scratch_1.4.20131203-2_all.deb $R/tmp/scratch.deb
+        cp deb/wiringpi_2.32_armhf.deb $R/tmp/wiringpi.deb
         chroot $R apt-get -y install /tmp/wiringpi.deb
         chroot $R apt-get -y install /tmp/scratch.deb
         chroot $R apt-get -y install nuscratch
