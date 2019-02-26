@@ -279,26 +279,13 @@ function configure_hardware() {
     fi
 
     # Install the RPi PPA
-    if [ "${RELEASE}" == "xenial" ]; then
-      chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/ppa
-      chroot $R apt-get -y update
-    fi
+    chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/ppa
+    chroot $R apt-get -y update
 
     # Firmware Kernel installation
     if [ "${RELEASE}" == "bionic" ]; then
       mkdir -p $R/boot/firmware
       chroot $R apt-get -y --no-install-recommends install linux-image-raspi2
-
-      # Install flash-kernel last so it doesn't try (and fail) to detect the
-      # platform in the chroot.
-      chroot $R apt-get -y install flash-kernel
-      VMLINUZ="$(ls -1 $R/boot/vmlinuz-* | sort | tail -n 1)"
-      #[ -z "$VMLINUZ" ] && exit 1
-      cp "${VMLINUZ}" $R/boot/firmware/vmlinuz
-      INITRD="$(ls -1 $R/boot/initrd.img-* | sort | tail -n 1)"
-      #[ -z "$INITRD" ] && exit 1
-      cp "${INITRD}" $R/boot/firmware/initrd.img
-
       chroot $R apt-get -y install linux-firmware-raspi2 u-boot-rpi
       rsync -av $R/lib/firmware/4.*-raspi2/device-tree/ $R/boot/firmware/
     elif [ "${RELEASE}" == "xenial" ]; then
