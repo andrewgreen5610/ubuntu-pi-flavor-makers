@@ -375,6 +375,16 @@ function configure_hardware() {
 LABEL=writable      /               ${FS}   defaults,noatime    0   0
 LABEL=system-boot   /boot/firmware  vfat    defaults            0   1
 EOM
+
+    if [ "${RELEASE}" == "bionic" ]; then
+      # Install flash-kernel last so it doesn't try (and fail) to detect the
+      # platform in the chroot.
+      chroot $R apt-get -y install flash-kernel
+      VMLINUZ="$(ls -1 $R/boot/vmlinuz-* | sort | tail -n 1)"
+      cp "${VMLINUZ}" $R/boot/firmware/vmlinuz
+      INITRD="$(ls -1 $R/boot/initrd.img-* | sort | tail -n 1)"
+      cp "${INITRD}" $R/boot/firmware/initrd.img
+    fi
 }
 
 function install_software() {
