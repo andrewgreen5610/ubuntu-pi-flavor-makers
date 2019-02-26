@@ -343,18 +343,13 @@ function configure_hardware() {
     fi
 
     # Add /root partition resize
-    if [ "${FS}" == "ext4" ]; then
-        CMDLINE_INIT="init=/usr/lib/raspi-config/init_resize.sh"
+    if [ "${FS}" == "ext4" ] || [ "${FS}" == "f2fs" ]; then
         # Add the first boot filesystem resize, init_resize.sh is
         # shipped in raspi-config.
         cp files/resize2fs_once $R/etc/init.d/
-        chroot $R /bin/systemctl enable resize2fs_once
-    elif [ "${FS}" == "f2fs" ]; then
+        chmod +x $R/etc/init.d/resize2fs_once
+        chroot $R update-rc.d resize2fs_once defaults
         CMDLINE_INIT="init=/usr/lib/raspi-config/init_resize.sh"
-        # Add the first boot filesystem resize, init_resize.sh is
-        # shipped in raspi-config.
-        cp files/resize_f2fs_once $R/etc/init.d/
-        chroot $R /bin/systemctl enable resize_f2fs_once
     else
         CMDLINE_INIT=""
     fi
@@ -371,7 +366,7 @@ function configure_hardware() {
 
     # Add /boot/cmdline.txt
     if [ "${RELEASE}" == "bionic" ]; then
-      echo "net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait splash plymouth.ignore-serial-consoles ${CMDLINE_INIT}" > $R/boot/firmware/cmdline.txt      
+      echo "net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=cfq fsck.repair=yes rootwait splash plymouth.ignore-serial-consoles ${CMDLINE_INIT}" > $R/boot/firmware/cmdline.txt
     elif [ "${RELEASE}" == "xenial" ]; then
       echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles ${CMDLINE_INIT}" > $R/boot/cmdline.txt
       # Enable VC4 on composited desktops
