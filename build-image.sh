@@ -306,9 +306,9 @@ function configure_hardware() {
     if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ "${FLAVOUR}" != "ubuntu-standard" ]; then
         # Install fbturbo drivers on non composited desktop OS
         # fbturbo causes VC4 to fail
-        #if [ "${FLAVOUR}" == "lubuntu" ] || [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
-        #    chroot $R apt-get -y install xserver-xorg-video-fbturbo
-        #fi
+        if [ "${FLAVOUR}" == "lubuntu" ] || [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
+            chroot $R apt-get -y install xserver-xorg-video-fbturbo
+        fi
 
         if [ "${RELEASE}" == "xenial" ]; then
           # omxplayer
