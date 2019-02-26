@@ -546,9 +546,9 @@ function make_raspi2_image() {
 
     # Initialising: msdos
     parted -s ${BASEDIR}/${IMAGE} mktable msdos
-    echo "Creating /boot partition"
+    echo "Creating /boot/firmware partition"
     parted -a optimal -s ${BASEDIR}/${IMAGE} mkpart primary fat32 1 "${SIZE_BOOT}"
-    echo "Creating /root partition"
+    echo "Creating / partition"
     parted -a optimal -s ${BASEDIR}/${IMAGE} mkpart primary ext4 "${SIZE_BOOT}" 100%
 
     PARTED_OUT=$(parted -s ${BASEDIR}/${IMAGE} unit b print)
@@ -564,8 +564,8 @@ function make_raspi2_image() {
 
     BOOT_LOOP=$(losetup --show -f -o ${BOOT_OFFSET} --sizelimit ${BOOT_LENGTH} ${BASEDIR}/${IMAGE})
     ROOT_LOOP=$(losetup --show -f -o ${ROOT_OFFSET} --sizelimit ${ROOT_LENGTH} ${BASEDIR}/${IMAGE})
-    echo "/boot: offset ${BOOT_OFFSET}, length ${BOOT_LENGTH}"
-    echo "/:     offset ${ROOT_OFFSET}, length ${ROOT_LENGTH}"
+    echo "/boot/firmware: offset ${BOOT_OFFSET}, length ${BOOT_LENGTH}"
+    echo "/:              offset ${ROOT_OFFSET}, length ${ROOT_LENGTH}"
 
     mkfs.vfat -n system-boot -S 512 -s 16 -v "${BOOT_LOOP}"
     if [ "${FS}" == "ext4" ]; then
