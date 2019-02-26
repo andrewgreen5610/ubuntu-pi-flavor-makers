@@ -333,20 +333,21 @@ function configure_hardware() {
       # copies-and-fills
       # Create /spindel_install so cofi doesn't segfault when chrooted via qemu-user-static
       touch $R/spindle_install
-      cp deb/raspi-copies-and-fills_0.5-1_armhf.deb $R/tmp/cofi.deb
+      cp deb/raspi-copies-and-fills_0.6_armhf.deb $R/tmp/cofi.deb
       chroot $R apt-get -y install /tmp/cofi.deb
+    fi
 
     # Add /root partition resize
-    #if [ "${FS}" == "ext4" ]; then
-    #    CMDLINE_INIT="init=/usr/lib/raspi-config/init_resize.sh"
-    #    # Add the first boot filesystem resize, init_resize.sh is
-    #    # shipped in raspi-config.
-    #    cp files/resize2fs_once	$R/etc/init.d/
-    #    chroot $R /bin/systemctl enable resize2fs_once
-    #else
-    #    CMDLINE_INIT=""
-    #fi
-    #chroot $R apt-get -y install raspi-config
+    if [ "${FS}" == "ext4" ]; then
+        CMDLINE_INIT="init=/usr/lib/raspi-config/init_resize.sh"
+        # Add the first boot filesystem resize, init_resize.sh is
+        # shipped in raspi-config.
+        cp files/resize2fs_once	$R/etc/init.d/
+        chroot $R /bin/systemctl enable resize2fs_once
+    else
+        CMDLINE_INIT=""
+    fi
+    chroot $R apt-get -y install raspi-config
     CMDLINE_INIT=""
 
     # Add /boot/config.txt
