@@ -319,44 +319,48 @@ function configure_hardware() {
     if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ "${FLAVOUR}" != "ubuntu-standard" ]; then
         # Install fbturbo drivers on non composited desktop OS
         # fbturbo causes VC4 to fail
-        if [ "${FLAVOUR}" == "lubuntu" ] || [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
-            chroot $R apt-get -y install xserver-xorg-video-fbturbo
-        fi
+        #if [ "${FLAVOUR}" == "lubuntu" ] || [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
+        #    chroot $R apt-get -y install xserver-xorg-video-fbturbo
+        #fi
 
-        # omxplayer
-        # - Requires: libpcre3 libfreetype6 fonts-freefont-ttf dbus libssl1.0.0 libsmbclient libssh-4
-        cp deb/omxplayer_0.3.7-git20160923-dfea8c9_armhf.deb $R/tmp/omxplayer.deb
-        chroot $R apt-get -y install /tmp/omxplayer.deb
+        if [ "${RELEASE}" == "xenial" ]; then
+          # omxplayer
+          # - Requires: libpcre3 libfreetype6 fonts-freefont-ttf dbus libssl1.0.0 libsmbclient libssh-4
+          cp deb/omxplayer_0.3.7-git20160923-dfea8c9_armhf.deb $R/tmp/omxplayer.deb
+          chroot $R apt-get -y install /tmp/omxplayer.deb
 
-        # Make Ubiquity "compatible" with the Raspberry Pi Foundation kernel.
-        if [ ${OEM_CONFIG} -eq 1 ]; then
+          # Make Ubiquity "compatible" with the Raspberry Pi Foundation kernel.
+          if [ ${OEM_CONFIG} -eq 1 ]; then
             cp plugininstall-${RELEASE}.py $R/usr/share/ubiquity/plugininstall.py
+          fi
         fi
     fi
 
-    # Install Raspberry Pi system tweaks
-    chroot $R apt-get -y install fbset raspberrypi-sys-mods
+    if [ "${RELEASE}" == "xenial" ]; then
+      # Install Raspberry Pi system tweaks
+      chroot $R apt-get -y install fbset raspberrypi-sys-mods
 
-    # Enable hardware random number generator
-    chroot $R apt-get -y install rng-tools
+      # Enable hardware random number generator
+      chroot $R apt-get -y install rng-tools
 
-    # copies-and-fills
-    # Create /spindel_install so cofi doesn't segfault when chrooted via qemu-user-static
-    touch $R/spindle_install
-    cp deb/raspi-copies-and-fills_0.5-1_armhf.deb $R/tmp/cofi.deb
-    chroot $R apt-get -y install /tmp/cofi.deb
+      # copies-and-fills
+      # Create /spindel_install so cofi doesn't segfault when chrooted via qemu-user-static
+      touch $R/spindle_install
+      cp deb/raspi-copies-and-fills_0.5-1_armhf.deb $R/tmp/cofi.deb
+      chroot $R apt-get -y install /tmp/cofi.deb
 
     # Add /root partition resize
-    if [ "${FS}" == "ext4" ]; then
-        CMDLINE_INIT="init=/usr/lib/raspi-config/init_resize.sh"
-        # Add the first boot filesystem resize, init_resize.sh is
-        # shipped in raspi-config.
-        cp files/resize2fs_once	$R/etc/init.d/
-        chroot $R /bin/systemctl enable resize2fs_once
-    else
-        CMDLINE_INIT=""
-    fi
-    chroot $R apt-get -y install raspi-config
+    #if [ "${FS}" == "ext4" ]; then
+    #    CMDLINE_INIT="init=/usr/lib/raspi-config/init_resize.sh"
+    #    # Add the first boot filesystem resize, init_resize.sh is
+    #    # shipped in raspi-config.
+    #    cp files/resize2fs_once	$R/etc/init.d/
+    #    chroot $R /bin/systemctl enable resize2fs_once
+    #else
+    #    CMDLINE_INIT=""
+    #fi
+    #chroot $R apt-get -y install raspi-config
+    CMDLINE_INIT=""
 
     # Add /boot/config.txt
     if [ "${RELEASE}" == "bionic" ]; then
@@ -629,48 +633,48 @@ function stage_01_base() {
 
 function stage_02_desktop() {
     R="${DESKTOP_R}"
-    mount_system
+    # mount_system
 
-    if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
-        echo "Skipping desktop install for ${FLAVOUR}"
-    elif [ "${FLAVOUR}" == "lubuntu" ]; then
-        install_meta ${FLAVOUR}-core --no-install-recommends
-        install_meta ${FLAVOUR}-desktop --no-install-recommends
-    elif [ "${FLAVOUR}" == "ubuntu-mate" ]; then
-        # Install meta packages the "old" way for Xenial
-        if [ "${RELEASE}" == "xenial" ]; then
-            install_meta ${FLAVOUR}-core --no-install-recommends
-            install_meta ${FLAVOUR}-desktop --no-install-recommends
-        else
-            install_meta ${FLAVOUR}-core
-            install_meta ${FLAVOUR}-desktop
-        fi
-    elif [ "${FLAVOUR}" == "xubuntu" ]; then
-        install_meta ${FLAVOUR}-core
-        install_meta ${FLAVOUR}-desktop
-    else
-        install_meta ${FLAVOUR}-desktop
-    fi
+    # if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
+    #     echo "Skipping desktop install for ${FLAVOUR}"
+    # elif [ "${FLAVOUR}" == "lubuntu" ]; then
+    #     install_meta ${FLAVOUR}-core --no-install-recommends
+    #     install_meta ${FLAVOUR}-desktop --no-install-recommends
+    # elif [ "${FLAVOUR}" == "ubuntu-mate" ]; then
+    #     # Install meta packages the "old" way for Xenial
+    #     if [ "${RELEASE}" == "xenial" ]; then
+    #         install_meta ${FLAVOUR}-core --no-install-recommends
+    #         install_meta ${FLAVOUR}-desktop --no-install-recommends
+    #     else
+    #         install_meta ${FLAVOUR}-core
+    #         install_meta ${FLAVOUR}-desktop
+    #     fi
+    # elif [ "${FLAVOUR}" == "xubuntu" ]; then
+    #     install_meta ${FLAVOUR}-core
+    #     install_meta ${FLAVOUR}-desktop
+    # else
+    #     install_meta ${FLAVOUR}-desktop
+    # fi
 
-    create_groups
-    create_user
-    prepare_oem_config
-    configure_ssh
-    configure_network
-    disable_services
-    apt_upgrade
-    apt_clean
-    umount_system
-    clean_up
+    # create_groups
+    # create_user
+    # prepare_oem_config
+    # configure_ssh
+    # configure_network
+    # disable_services
+    # apt_upgrade
+    # apt_clean
+    # umount_system
+    # clean_up
     sync_to ${DEVICE_R}
-    make_tarball
+    #make_tarball
 }
 
 function stage_03_raspi2() {
     R=${DEVICE_R}
     mount_system
     configure_hardware ${FS_TYPE}
-    install_software
+    #install_software
     apt_upgrade
     apt_clean
     clean_up
@@ -710,8 +714,8 @@ function stage_04_corrections() {
     make_raspi2_image ${FS_TYPE} ${FS_SIZE}
 }
 
-stage_01_base
+#stage_01_base
 stage_02_desktop
 stage_03_raspi2
-stage_04_corrections
+#stage_04_corrections
 #compress_image
