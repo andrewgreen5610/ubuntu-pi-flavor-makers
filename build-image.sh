@@ -347,13 +347,18 @@ function configure_hardware() {
         CMDLINE_INIT="init=/usr/lib/raspi-config/init_resize.sh"
         # Add the first boot filesystem resize, init_resize.sh is
         # shipped in raspi-config.
-        cp files/resize2fs_once	$R/etc/init.d/
+        cp files/resize2fs_once $R/etc/init.d/
         chroot $R /bin/systemctl enable resize2fs_once
+    elif [ "${FS}" == "f2fs" ]; then
+        CMDLINE_INIT="init=/usr/lib/raspi-config/init_resize.sh"
+        # Add the first boot filesystem resize, init_resize.sh is
+        # shipped in raspi-config.
+        cp files/resize_f2fs_once $R/etc/init.d/
+        chroot $R /bin/systemctl enable resize_f2fs_once
     else
         CMDLINE_INIT=""
     fi
     chroot $R apt-get -y install raspi-config
-    CMDLINE_INIT=""
 
     # Add /boot/config.txt
     if [ "${RELEASE}" == "bionic" ]; then
