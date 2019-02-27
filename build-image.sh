@@ -511,6 +511,7 @@ function clean_up() {
         mv -v $R/etc/ld.so.preload.disabled $R/etc/ld.so.preload
     fi
 
+    # Build system state tracking files
     rm -rf $R/tmp/.bootstrap || true
     rm -rf $R/tmp/.minimal || true
     rm -rf $R/tmp/.standard || true
