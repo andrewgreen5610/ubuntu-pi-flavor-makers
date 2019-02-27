@@ -262,14 +262,11 @@ function configure_hardware() {
         chroot $R apt-get -y install xserver-xorg-video-fbturbo
     fi
 
-    # Install Raspberry Pi system tweaks
-    #chroot $R apt-get -y install fbset raspberrypi-sys-mods
-
     # Enable hardware random number generator
     chroot $R apt-get -y install rng-tools
 
-    # Install the Ubuntu port of raspi-config
-    chroot $R apt-get -y install raspi-config
+    # Install the Ubuntu port of raspi-config & Raspberry Pi system tweaks
+    chroot $R apt-get -y install raspi-config raspberrypi-sys-mods
     # Enable / partition resize
     chroot $R systemctl enable resize-fs.service
 
