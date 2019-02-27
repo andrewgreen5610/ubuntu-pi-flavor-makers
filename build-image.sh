@@ -289,7 +289,7 @@ function configure_hardware() {
     if [ "${RELEASE}" == "bionic" ]; then
       mkdir -p $R/boot/firmware
       chroot $R apt-get -y --no-install-recommends install linux-image-raspi2
-      chroot $R apt-get -y install linux-firmware-raspi2 u-boot-rpi
+      chroot $R apt-get -y install linux-firmware-raspi2 u-boot-rpi u-boot-tools
       rsync -av $R/lib/firmware/4.*-raspi2/device-tree/ $R/boot/firmware/
     elif [ "${RELEASE}" == "xenial" ]; then
       chroot $R apt-get -y install libraspberrypi-bin libraspberrypi-dev \
