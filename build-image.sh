@@ -136,6 +136,7 @@ function create_groups() {
     chroot $R groupadd -f --system i2c
     chroot $R groupadd -f --system input
     chroot $R groupadd -f --system spi
+    cp files/adduser.local $R/usr/local/sbin/
 }
 
 # Create default user
