@@ -263,6 +263,11 @@ function configure_hardware() {
         chroot $R apt-get -y install xserver-xorg-video-fbturbo
     fi
 
+    # pi-top poweroff and brightness utilities
+    cp files/pi-top-* $R/usr/bin/
+    chown root:root $R/usr/bin/pi-top-*
+    chmod +x $R/usr/bin/pi-top-*
+
     # Install the Ubuntu port of raspi-config & Raspberry Pi system tweaks
     chroot $R apt-get -y install raspi-config raspberrypi-sys-mods
     # Enable / partition resize
