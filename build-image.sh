@@ -247,7 +247,7 @@ function configure_hardware() {
     local FS="${1}"
 
     # Install the RPi PPA
-    chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/ppa
+    chroot $R apt-add-repository --yes --no-update ppa:ubuntu-pi-flavour-makers/ppa
     chroot $R apt-get -y update
 
     # Firmware Kernel installation
@@ -546,7 +546,7 @@ function stage_02_desktop() {
         mount_system
         if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
             # Install the RPi PPA to get the latest meta package for ubuntu-mate
-            chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/ppa
+            chroot $R apt-add-repository --yes --no-update ppa:ubuntu-pi-flavour-makers/ppa
             chroot $R apt-get -y update
             install_meta ${FLAVOUR}-core
             install_meta ${FLAVOUR}-desktop
