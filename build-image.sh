@@ -260,10 +260,6 @@ function disable_services() {
 
 function configure_hardware() {
     local FS="${1}"
-    if [ "${FS}" != "ext4" ] && [ "${FS}" != 'f2fs' ]; then
-        echo "ERROR! Unsupport filesystem requested. Exitting."
-        exit 1
-    fi
 
     # Install the RPi PPA
     chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/ppa
