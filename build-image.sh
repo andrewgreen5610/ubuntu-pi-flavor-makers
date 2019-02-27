@@ -356,13 +356,14 @@ function configure_hardware() {
 
     # Add /boot/cmdline.txt
     if [ "${RELEASE}" == "bionic" ]; then
-      echo "net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=cfq fsck.repair=yes rootwait splash plymouth.ignore-serial-consoles ${CMDLINE_INIT}" > $R/boot/firmware/cmdline.txt
+      echo "net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles" > $R/boot/firmware/cmdline.txt
     elif [ "${RELEASE}" == "xenial" ]; then
-      echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles ${CMDLINE_INIT}" > $R/boot/cmdline.txt
-      # Enable VC4 on composited desktops
-      if [ "${FLAVOUR}" == "kubuntu" ] || [ "${FLAVOUR}" == "ubuntu" ] || [ "${FLAVOUR}" == "ubuntu-gnome" ]; then
-        echo "dtoverlay=vc4-kms-v3d" >> $R/boot/config.txt
-      fi
+      echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles" > $R/boot/cmdline.txt
+    fi
+
+    # Enable VC4 on composited desktops
+    if [ "${FLAVOUR}" == "kubuntu" ] || [ "${FLAVOUR}" == "ubuntu" ] || [ "${FLAVOUR}" == "ubuntu-gnome" ]; then
+      echo "dtoverlay=vc4-kms-v3d" >> $R/boot/config.txt
     fi
 
     # Create swapfile
