@@ -486,6 +486,7 @@ function clean_up() {
     rm -f $R/var/cache/bootstrap.log || true
     truncate -s 0 $R/var/log/lastlog || true
     truncate -s 0 $R/var/log/faillog || true
+    mkdir -p $R/var/log/installer
 
     # SSH host keys
     rm -f $R/etc/ssh/ssh_host_*key
