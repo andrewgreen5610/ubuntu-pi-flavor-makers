@@ -273,6 +273,9 @@ function configure_hardware() {
     # Enable / partition resize
     chroot $R systemctl enable resize-fs.service
 
+    # Install bluetooth firmware and helpers
+    chroot $R apt-get -y install pi-bluetooth
+
     # Add /boot/config.txt
     cp files/config.txt $R/boot/firmware/
     sed -i 's/#kernel=""/kernel=vmlinuz/' $R/boot/firmware/config.txt
