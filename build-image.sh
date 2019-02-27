@@ -98,19 +98,12 @@ function apt_clean() {
     chroot $R apt-get clean
 }
 
-# Install Ubuntu minimal
-function ubuntu_minimal() {
-    if [ ! -f "${R}/tmp/.minimal" ]; then
-        chroot $R apt-get -y install ubuntu-minimal^
-        chroot $R apt-get -y install parted software-properties-common
-        touch "${R}/tmp/.minimal"
-    fi
-}
-
 # Install Ubuntu standard
 function ubuntu_standard() {
     if [ ! -f "${R}/tmp/.standard" ]; then
+        chroot $R apt-get -y install ubuntu-minimal^
         chroot $R apt-get -y install ubuntu-standard^
+        chroot $R apt-get -y install parted software-properties-common
         touch "${R}/tmp/.standard"
     fi
 }
@@ -465,9 +458,7 @@ function clean_up() {
 
     # Build system state tracking files
     rm -rf $R/tmp/.bootstrap || true
-    rm -rf $R/tmp/.minimal || true
     rm -rf $R/tmp/.standard || true
-    rm -rf $R/spindle_install || true
 }
 
 function make_raspi2_image() {
@@ -571,7 +562,6 @@ function stage_01_base() {
     generate_locale
     apt_sources
     apt_upgrade
-    ubuntu_minimal
     ubuntu_standard
     apt_clean
     umount_system
