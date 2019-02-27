@@ -262,9 +262,6 @@ function configure_hardware() {
         chroot $R apt-get -y install xserver-xorg-video-fbturbo
     fi
 
-    # Enable hardware random number generator
-    chroot $R apt-get -y install rng-tools
-
     # Install the Ubuntu port of raspi-config & Raspberry Pi system tweaks
     chroot $R apt-get -y install raspi-config raspberrypi-sys-mods
     # Enable / partition resize
@@ -379,9 +376,6 @@ function install_software() {
 }
 
 function clean_up() {
-    # Remove packages required for the image build but not the OS.
-    chroot $R apt-get -y remove u-boot-tools
-
     rm -f $R/etc/apt/*.save || true
     rm -f $R/etc/apt/sources.list.d/*.save || true
     rm -f $R/etc/resolvconf/resolv.conf.d/original
