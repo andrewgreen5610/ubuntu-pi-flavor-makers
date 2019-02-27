@@ -522,8 +522,8 @@ function compress_image() {
 }
 
 function stage_01_base() {
-    R="${BASE_R}"
-    if [ ! -f "${R}/tmp/.stage_base" ]; then
+    if [ ! -f "${BASE_R}/tmp/.stage_base" ]; then
+        R="${BASE_R}"
         bootstrap
         mount_system
         generate_locale
@@ -538,15 +538,16 @@ function stage_01_base() {
 }
 
 function stage_02_desktop() {
-    R="${DESKTOP_R}"
-    if [ ! -f "${R}/tmp/.stage_desktop" ]; then
+    if [ ! -f "${DESKTOP_R}/tmp/.stage_desktop" ]; then
+        R="${BASE_R}"
+        sync_to "${DESKTOP_R}"
+        
+        R="${DESKTOP_R}"
         mount_system
-
         if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
             # Install the RPi PPA to get the latest meta package for ubuntu-mate
             chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/ppa
             chroot $R apt-get -y update
-
             install_meta ${FLAVOUR}-core
             install_meta ${FLAVOUR}-desktop
         elif [ "${FLAVOUR}" == "xubuntu" ]; then
