@@ -369,6 +369,12 @@ function configure_hardware() {
     fallocate -l 128M $R/swapfile
     chmod 600 $R/swapfile
     mkswap -L swap $R/swapfile
+
+    echo "kernel.printk = 3 4 1 3"      > $R/etc/sysctl.d/98-rpi.conf
+    echo "vm.min_free_kbytes = 16384"  >> $R/etc/sysctl.d/98-rpi.conf
+    echo "vm.swappiness = 10"          >> $R/etc/sysctl.d/98-rpi.conf
+    echo "vm.vfs_cache_pressure = 50"  >> $R/etc/sysctl.d/98-rpi.conf
+
     # Set up fstab
     cat <<EOM >$R/etc/fstab
 LABEL=writable     /               ${FS}  defaults,noatime  0  0
