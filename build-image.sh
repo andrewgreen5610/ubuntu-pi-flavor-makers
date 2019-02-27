@@ -207,14 +207,6 @@ function disable_services() {
         chroot $R /bin/systemctl disable brltty.service
     fi
 
-    # Disable ntp because systemd-timesyncd will take care of this.
-    if [ -e $R/etc/init.d/ntp ]; then
-        chroot $R /bin/systemctl disable ntp
-        chmod -x $R/usr/sbin/ntpd
-        cp files/prefer-timesyncd.service $R/lib/systemd/system/
-        chroot $R /bin/systemctl enable prefer-timesyncd.service
-    fi
-
     # Disable irqbalance because it is of little, if any, benefit on ARM.
     if [ -e $R/etc/init.d/irqbalance ]; then
         chroot $R /bin/systemctl disable irqbalance
