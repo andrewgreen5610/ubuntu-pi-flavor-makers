@@ -26,10 +26,6 @@ fi
 
 # Mount host system
 function mount_system() {
-    # In case this is a re-run move the cofi preload out of the way
-    if [ -e $R/etc/ld.so.preload ]; then
-        mv -v $R/etc/ld.so.preload $R/etc/ld.so.preload.disabled
-    fi
     mount -t proc none $R/proc
     mount -t sysfs none $R/sys
     mount -o bind /dev $R/dev
@@ -466,11 +462,6 @@ function clean_up() {
     rm -f $R/etc/NetworkManager/system-connections/*
     [ -L $R/var/lib/dbus/machine-id ] || rm -f $R/var/lib/dbus/machine-id
     echo '' > $R/etc/machine-id
-
-    # Enable cofi
-    if [ -e $R/etc/ld.so.preload.disabled ]; then
-        mv -v $R/etc/ld.so.preload.disabled $R/etc/ld.so.preload
-    fi
 
     # Build system state tracking files
     rm -rf $R/tmp/.bootstrap || true
