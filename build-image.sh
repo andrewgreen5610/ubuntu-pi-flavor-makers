@@ -330,9 +330,6 @@ function configure_hardware() {
       # Install Raspberry Pi system tweaks
       chroot $R apt-get -y install fbset raspberrypi-sys-mods
 
-      # Enable hardware random number generator
-      chroot $R apt-get -y install rng-tools
-
       # copies-and-fills
       # Create /spindel_install so cofi doesn't segfault when chrooted via qemu-user-static
       touch $R/spindle_install
@@ -340,18 +337,13 @@ function configure_hardware() {
       chroot $R apt-get -y install /tmp/cofi.deb
     fi
 
-    # Add /root partition resize
-    if [ "${FS}" == "ext4" ] || [ "${FS}" == "f2fs" ]; then
-        # Add the first boot filesystem resize, init_resize.sh is
-        # shipped in raspi-config.
-        cp files/resize2fs_once $R/etc/init.d/
-        chmod +x $R/etc/init.d/resize2fs_once
-        chroot $R update-rc.d resize2fs_once defaults
-        CMDLINE_INIT="init=/usr/lib/raspi-config/init_resize.sh"
-    else
-        CMDLINE_INIT=""
-    fi
+    # Enable hardware random number generator
+    chroot $R apt-get -y install rng-tools
+
+    # Install the Ubuntu port of raspi-config
     chroot $R apt-get -y install raspi-config
+    # Enable / partition resize
+    chroot $R systemctl enable resize-fs.service
 
     # Add /boot/config.txt
     if [ "${RELEASE}" == "bionic" ]; then
