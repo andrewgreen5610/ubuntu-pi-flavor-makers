@@ -431,7 +431,7 @@ function make_raspi2_image() {
     # Build the image file
     local FS="${1}"
     local SIZE_IMG="${2}"
-    local SIZE_BOOT="250MiB"
+    local SIZE_BOOT="128MiB"
 
     if [ "${FS}" != "ext4" ] && [ "${FS}" != 'f2fs' ]; then
         echo "ERROR! Unsupport filesystem requested. Exitting."
