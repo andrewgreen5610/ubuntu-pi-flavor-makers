@@ -24,6 +24,7 @@ FLAVOUR_NAME="Ubuntu MATE"
 RELEASE="bionic"
 VERSION="18.04.2"
 QUALITY=""
+USERNAME="${FLAVOUR}"
 
 # Either 'ext4' or 'f2fs'
 FS_TYPE="ext4"
@@ -46,19 +47,10 @@ DEVICE_R=${BUILDDIR}/pi
 ARCH=$(uname -m)
 export TZ=UTC
 
-
-if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
-    USERNAME="ubuntu"
-    OEM_CONFIG=0
-else
-    USERNAME="${FLAVOUR}"
-    OEM_CONFIG=1
-fi
-
 # Override OEM_CONFIG here if required. Either 0 or 1.
 # - 0 to hardcode a user.
 # - 1 to use oem-config.
-#OEM_CONFIG=1
+OEM_CONFIG=1
 
 if [ ${OEM_CONFIG} -eq 1 ]; then
     USERNAME="oem"
