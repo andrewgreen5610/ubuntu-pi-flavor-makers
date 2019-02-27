@@ -136,10 +136,6 @@ function create_groups() {
     chroot $R groupadd -f --system i2c
     chroot $R groupadd -f --system input
     chroot $R groupadd -f --system spi
-
-    # Create adduser hook
-    cp files/adduser.local $R/usr/local/sbin/adduser.local
-    chmod +x $R/usr/local/sbin/adduser.local
 }
 
 # Create default user
@@ -188,9 +184,6 @@ function prepare_oem_config() {
 
 function configure_ssh() {
     chroot $R apt-get -y install openssh-server sshguard
-    cp files/sshdgenkeys.service $R/lib/systemd/system/
-    mkdir -p $R/etc/systemd/system/ssh.service.wants
-    chroot $R /bin/systemctl enable sshdgenkeys.service
     chroot $R /bin/systemctl disable ssh.service
     chroot $R /bin/systemctl disable sshguard.service
 }
@@ -271,11 +264,6 @@ function configure_hardware() {
     chroot $R apt-get -y install linux-firmware-raspi2 u-boot-rpi u-boot-tools
     rsync -av $R/lib/firmware/4.*-raspi2/device-tree/ $R/boot/firmware/
 
-    # pi-top poweroff and brightness utilities
-    cp -v files/pi-top-* $R/usr/bin/
-    chown root:root $R/usr/bin/pi-top-*
-    chmod +x $R/usr/bin/pi-top-*
-
     # Install fbturbo drivers on non composited desktop OS
     # fbturbo causes VC4 to fail
     if [ "${FLAVOUR}" == "lubuntu" ] || [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
@@ -310,11 +298,6 @@ function configure_hardware() {
     fallocate -l 128M $R/swapfile
     chmod 600 $R/swapfile
     mkswap -L swap $R/swapfile
-
-    echo "kernel.printk = 3 4 1 3"      > $R/etc/sysctl.d/98-rpi.conf
-    echo "vm.min_free_kbytes = 16384"  >> $R/etc/sysctl.d/98-rpi.conf
-    echo "vm.swappiness = 10"          >> $R/etc/sysctl.d/98-rpi.conf
-    echo "vm.vfs_cache_pressure = 50"  >> $R/etc/sysctl.d/98-rpi.conf
 
     # Set up fstab
     cat <<EOM >$R/etc/fstab
