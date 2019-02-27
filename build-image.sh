@@ -243,7 +243,7 @@ function disable_services() {
 
     # Disable kerneloops because these images are not official
     if [ -e $R/usr/sbin/kerneloops ]; then
-        sed -i s'/enabled=1/enabled=0/' $R/etc/default/kerneloops
+        sed -i s'/ENABLED=1/ENABLED=0/' $R/etc/default/kerneloops
         chroot $R /bin/systemctl disable kerneloops.service
     fi
 
