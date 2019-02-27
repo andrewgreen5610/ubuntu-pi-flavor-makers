@@ -411,6 +411,9 @@ function install_software() {
 }
 
 function clean_up() {
+    # Remove packages required for the image build but not the OS.
+    chroot $R apt-get -y remove u-boot-tools
+
     rm -f $R/etc/apt/*.save || true
     rm -f $R/etc/apt/sources.list.d/*.save || true
     rm -f $R/etc/resolvconf/resolv.conf.d/original
