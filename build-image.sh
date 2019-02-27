@@ -62,12 +62,8 @@ function bootstrap() {
 
     # Use the same base system for all flavours.
     if [ ! -f "${R}/tmp/.bootstrap" ]; then
-        if [ "${ARCH}" == "armv7l" ]; then
-            debootstrap --verbose $RELEASE $R http://ports.ubuntu.com/
-        else
-            qemu-debootstrap --verbose --arch=armhf $RELEASE $R http://ports.ubuntu.com/
-        fi
-        touch "$R/tmp/.bootstrap"
+      qemu-debootstrap --verbose --arch=armhf $RELEASE $R http://ports.ubuntu.com/
+      touch "$R/tmp/.bootstrap"
     fi
 }
 
