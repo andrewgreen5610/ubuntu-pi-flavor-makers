@@ -57,10 +57,7 @@ function bootstrap() {
     pxz qemu-user-static rsync ubuntu-keyring whois xz-utils
 
     # Use the same base system for all flavours.
-    if [ ! -f "${R}/tmp/.bootstrap" ]; then
-      qemu-debootstrap --verbose --arch=armhf $RELEASE $R http://ports.ubuntu.com/
-      touch "$R/tmp/.bootstrap"
-    fi
+    qemu-debootstrap --verbose --arch=armhf $RELEASE $R http://ports.ubuntu.com/
 }
 
 function generate_locale() {
@@ -100,12 +97,9 @@ function apt_clean() {
 
 # Install Ubuntu standard
 function ubuntu_standard() {
-    if [ ! -f "${R}/tmp/.standard" ]; then
-        chroot $R apt-get -y install ubuntu-minimal^
-        chroot $R apt-get -y install ubuntu-standard^
-        chroot $R apt-get -y install parted software-properties-common
-        touch "${R}/tmp/.standard"
-    fi
+    chroot $R apt-get -y install ubuntu-minimal^
+    chroot $R apt-get -y install ubuntu-standard^
+    chroot $R apt-get -y install software-properties-common
 }
 
 # Install meta packages
@@ -338,6 +332,8 @@ EOM
 }
 
 function install_software() {
+    return 0
+
     # Python
     chroot $R apt-get -y install \
     python-minimal python3-minimal \
@@ -457,8 +453,7 @@ function clean_up() {
     echo '' > $R/etc/machine-id
 
     # Build system state tracking files
-    rm -rf $R/tmp/.bootstrap || true
-    rm -rf $R/tmp/.standard || true
+    rm -rf $R/tmp/.stage_* || true
 }
 
 function make_raspi2_image() {
@@ -557,47 +552,57 @@ function compress_image() {
 
 function stage_01_base() {
     R="${BASE_R}"
-    bootstrap
-    mount_system
-    generate_locale
-    apt_sources
-    apt_upgrade
-    ubuntu_standard
-    apt_clean
-    umount_system
-    sync_to "${DESKTOP_R}"
+    if [ ! -f "${R}/tmp/.stage_base" ]; then
+        bootstrap
+        mount_system
+        generate_locale
+        apt_sources
+        apt_upgrade
+        ubuntu_standard
+        apt_clean
+        umount_system
+        touch "$R/tmp/.stage_base"
+        sync_to "${DESKTOP_R}"
+    fi
 }
 
 function stage_02_desktop() {
     R="${DESKTOP_R}"
-    mount_system
+    if [ ! -f "${R}/tmp/.stage_desktop" ]; then
+        mount_system
 
-    if [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
-        install_meta ${FLAVOUR}-core
-        install_meta ${FLAVOUR}-desktop
-    else
-        install_meta ${FLAVOUR}-desktop
+        if [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
+            install_meta ${FLAVOUR}-core
+            install_meta ${FLAVOUR}-desktop
+        else
+            install_meta ${FLAVOUR}-desktop
+        fi
+
+        create_groups
+        create_user
+        prepare_oem_config
+        configure_ssh
+        configure_network
+        disable_services
+        apt_upgrade
+        apt_clean
+        umount_system
+        clean_up
+        sync_to ${DEVICE_R}
+        make_tarball
+        touch "${DESKTOP_R}/tmp/.stage_desktop"
     fi
-
-    create_groups
-    create_user
-    prepare_oem_config
-    configure_ssh
-    configure_network
-    disable_services
-    apt_upgrade
-    apt_clean
-    umount_system
-    clean_up
-    sync_to ${DEVICE_R}
-    make_tarball
 }
 
 function stage_03_raspi2() {
+    # Always start with a clean rootfs
+    R="${DESKTOP_R}"
+    sync_to ${DEVICE_R}
+
     R=${DEVICE_R}
     mount_system
     configure_hardware ${FS_TYPE}
-    #install_software
+    install_software
     apt_upgrade
     apt_clean
     clean_up
