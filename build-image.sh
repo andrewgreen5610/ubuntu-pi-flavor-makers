@@ -589,41 +589,27 @@ function stage_01_base() {
 
 function stage_02_desktop() {
     R="${DESKTOP_R}"
-    # mount_system
+    mount_system
 
-    # if [ "${FLAVOUR}" == "ubuntu-minimal" ] || [ "${FLAVOUR}" == "ubuntu-standard" ]; then
-    #     echo "Skipping desktop install for ${FLAVOUR}"
-    # elif [ "${FLAVOUR}" == "lubuntu" ]; then
-    #     install_meta ${FLAVOUR}-core --no-install-recommends
-    #     install_meta ${FLAVOUR}-desktop --no-install-recommends
-    # elif [ "${FLAVOUR}" == "ubuntu-mate" ]; then
-    #     # Install meta packages the "old" way for Xenial
-    #     if [ "${RELEASE}" == "xenial" ]; then
-    #         install_meta ${FLAVOUR}-core --no-install-recommends
-    #         install_meta ${FLAVOUR}-desktop --no-install-recommends
-    #     else
-    #         install_meta ${FLAVOUR}-core
-    #         install_meta ${FLAVOUR}-desktop
-    #     fi
-    # elif [ "${FLAVOUR}" == "xubuntu" ]; then
-    #     install_meta ${FLAVOUR}-core
-    #     install_meta ${FLAVOUR}-desktop
-    # else
-    #     install_meta ${FLAVOUR}-desktop
-    # fi
+    if [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
+        install_meta ${FLAVOUR}-core
+        install_meta ${FLAVOUR}-desktop
+    else
+        install_meta ${FLAVOUR}-desktop
+    fi
 
-    # create_groups
-    # create_user
-    # prepare_oem_config
-    # configure_ssh
-    # configure_network
-    # disable_services
-    # apt_upgrade
-    # apt_clean
-    # umount_system
-    # clean_up
+    create_groups
+    create_user
+    prepare_oem_config
+    configure_ssh
+    configure_network
+    disable_services
+    apt_upgrade
+    apt_clean
+    umount_system
+    clean_up
     sync_to ${DEVICE_R}
-    #make_tarball
+    make_tarball
 }
 
 function stage_03_raspi2() {
@@ -650,7 +636,7 @@ function stage_04_corrections() {
     make_raspi2_image ${FS_TYPE} ${FS_SIZE}
 }
 
-#stage_01_base
+stage_01_base
 stage_02_desktop
 stage_03_raspi2
 #stage_04_corrections
