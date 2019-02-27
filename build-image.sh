@@ -434,11 +434,6 @@ function clean_up() {
     rm -f $R/etc/ssh/ssh_host_*key
     rm -f $R/etc/ssh/ssh_host_*.pub
 
-    # Clean up old Raspberry Pi firmware and modules
-    rm -f $R/boot/.firmware_revision || true
-    rm -rf $R/boot.bak || true
-    rm -rf $R/lib/modules.bak || true
-
     # Potentially sensitive.
     rm -f $R/root/.bash_history
     rm -f $R/root/.ssh/known_hosts
