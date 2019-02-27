@@ -106,14 +106,14 @@ function apt_clean() {
 function ubuntu_minimal() {
     if [ ! -f "${R}/tmp/.minimal" ]; then
         chroot $R apt-get -y install ubuntu-minimal^
-        chroot $R apt-get -y install f2fs-tools parted software-properties-common
+        chroot $R apt-get -y install parted software-properties-common
         touch "${R}/tmp/.minimal"
     fi
 }
 
 # Install Ubuntu standard
 function ubuntu_standard() {
-    if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ ! -f "${R}/tmp/.standard" ]; then
+    if [ ! -f "${R}/tmp/.standard" ]; then
         chroot $R apt-get -y install ubuntu-standard^
         touch "${R}/tmp/.standard"
     fi
@@ -302,12 +302,11 @@ function configure_hardware() {
     chown root:root $R/usr/bin/pi-top-*
     chmod +x $R/usr/bin/pi-top-*
 
-    if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ "${FLAVOUR}" != "ubuntu-standard" ]; then
-        # Install fbturbo drivers on non composited desktop OS
-        # fbturbo causes VC4 to fail
-        if [ "${FLAVOUR}" == "lubuntu" ] || [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
-            chroot $R apt-get -y install xserver-xorg-video-fbturbo
-        fi
+    # Install fbturbo drivers on non composited desktop OS
+    # fbturbo causes VC4 to fail
+    if [ "${FLAVOUR}" == "lubuntu" ] || [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
+        chroot $R apt-get -y install xserver-xorg-video-fbturbo
+    fi
 
         if [ "${RELEASE}" == "xenial" ]; then
           # omxplayer
@@ -391,49 +390,44 @@ EOM
 }
 
 function install_software() {
+    # Python
+    chroot $R apt-get -y install \
+    python-minimal python3-minimal \
+    python-dev python3-dev \
+    python-pip python3-pip \
+    python-setuptools python3-setuptools
 
-    if [ "${FLAVOUR}" != "ubuntu-minimal" ]; then
-        # FIXME - Replace with meta packages(s)
+    # Python extras a Raspberry Pi hacker expects to be available ;-)
+    chroot $R apt-get -y install \
+    raspi-gpio \
+    python-rpi.gpio python3-rpi.gpio \
+    python-gpiozero python3-gpiozero \
+    pigpio python-pigpio python3-pigpio \
+    python-serial python3-serial \
+    python-spidev python3-spidev \
+    python-smbus python3-smbus \
+    python-astropi python3-astropi \
+    python-drumhat python3-drumhat \
+    python-envirophat python3-envirophat \
+    python-pianohat python3-pianohat \
+    python-pantilthat python3-pantilthat \
+    python-scrollphat python3-scrollphat \
+    python-st7036 python3-st7036 \
+    python-sn3218 python3-sn3218 \
+    python-piglow python3-piglow \
+    python-microdotphat python3-microdotphat \
+    python-mote python3-mote \
+    python-motephat python3-motephat \
+    python-explorerhat python3-explorerhat \
+    python-rainbowhat python3-rainbowhat \
+    python-sense-hat python3-sense-hat \
+    python-sense-emu python3-sense-emu sense-emu-tools \
+    python-picamera python3-picamera \
+    python-rtimulib python3-rtimulib \
+    python-pygame
 
-        # Python
-        chroot $R apt-get -y install \
-        python-minimal python3-minimal \
-        python-dev python3-dev \
-        python-pip python3-pip \
-        python-setuptools python3-setuptools
-
-        # Python extras a Raspberry Pi hacker expects to be available ;-)
-        chroot $R apt-get -y install \
-        raspi-gpio \
-        python-rpi.gpio python3-rpi.gpio \
-        python-gpiozero python3-gpiozero \
-        pigpio python-pigpio python3-pigpio \
-        python-serial python3-serial \
-        python-spidev python3-spidev \
-        python-smbus python3-smbus \
-        python-astropi python3-astropi \
-        python-drumhat python3-drumhat \
-        python-envirophat python3-envirophat \
-        python-pianohat python3-pianohat \
-        python-pantilthat python3-pantilthat \
-        python-scrollphat python3-scrollphat \
-        python-st7036 python3-st7036 \
-        python-sn3218 python3-sn3218 \
-        python-piglow python3-piglow \
-        python-microdotphat python3-microdotphat \
-        python-mote python3-mote \
-        python-motephat python3-motephat \
-        python-explorerhat python3-explorerhat \
-        python-rainbowhat python3-rainbowhat \
-        python-sense-hat python3-sense-hat \
-        python-sense-emu python3-sense-emu sense-emu-tools \
-        python-picamera python3-picamera \
-        python-rtimulib python3-rtimulib \
-        python-pygame
-
-        chroot $R pip2 install codebug_tether
-        chroot $R pip3 install codebug_tether
-    fi
+    chroot $R pip2 install codebug_tether
+    chroot $R pip3 install codebug_tether
 
     if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
         # Install the Minecraft PPA
