@@ -575,7 +575,14 @@ function stage_02_desktop() {
     if [ ! -f "${R}/tmp/.stage_desktop" ]; then
         mount_system
 
-        if [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
+        if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
+            # Install the RPi PPA to get the latest meta package for ubuntu-mate
+            chroot $R apt-add-repository -y ppa:ubuntu-pi-flavour-makers/ppa
+            chroot $R apt-get -y update
+
+            install_meta ${FLAVOUR}-core
+            install_meta ${FLAVOUR}-desktop
+        elif [ "${FLAVOUR}" == "xubuntu" ]; then
             install_meta ${FLAVOUR}-core
             install_meta ${FLAVOUR}-desktop
         else
