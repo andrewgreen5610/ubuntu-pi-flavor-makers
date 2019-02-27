@@ -568,7 +568,7 @@ function make_raspi2_image() {
 
     mkfs.vfat -n system-boot -S 512 -s 16 -v "${BOOT_LOOP}"
     if [ "${FS}" == "ext4" ]; then
-        mkfs.ext4 -L writable -m 0 -O ^huge_file "${ROOT_LOOP}"
+        mkfs.ext4 -L writable -m 0 "${ROOT_LOOP}"
     else
         mkfs.f2fs -l writable -o 1 "${ROOT_LOOP}"
     fi
