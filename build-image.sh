@@ -109,10 +109,8 @@ function apt_clean() {
 # Install Ubuntu minimal
 function ubuntu_minimal() {
     if [ ! -f "${R}/tmp/.minimal" ]; then
-        chroot $R apt-get -y install ubuntu-minimal parted software-properties-common
-        if [ "${FS}" == "f2fs" ]; then
-            chroot $R apt-get -y install f2fs-tools
-        fi
+        chroot $R apt-get -y install ubuntu-minimal^
+        chroot $R apt-get -y install f2fs-tools parted software-properties-common
         touch "${R}/tmp/.minimal"
     fi
 }
@@ -120,7 +118,7 @@ function ubuntu_minimal() {
 # Install Ubuntu standard
 function ubuntu_standard() {
     if [ "${FLAVOUR}" != "ubuntu-minimal" ] && [ ! -f "${R}/tmp/.standard" ]; then
-        chroot $R apt-get -y install ubuntu-standard
+        chroot $R apt-get -y install ubuntu-standard^
         touch "${R}/tmp/.standard"
     fi
 }
