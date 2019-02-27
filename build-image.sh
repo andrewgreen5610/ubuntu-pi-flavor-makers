@@ -365,10 +365,15 @@ function configure_hardware() {
       fi
     fi
 
+    # Create swapfile
+    fallocate -l 128M $R/swapfile
+    chmod 600 $R/swapfile
+    mkswap -L swap $R/swapfile
     # Set up fstab
     cat <<EOM >$R/etc/fstab
-LABEL=writable      /               ${FS}   defaults,noatime    0   0
-LABEL=system-boot   /boot/firmware  vfat    defaults            0   1
+LABEL=writable     /               ${FS}  defaults,noatime  0  0
+LABEL=system-boot  /boot/firmware  vfat   defaults          0  1
+/swapfile          none            swap   sw                0  0
 EOM
 
     if [ "${RELEASE}" == "bionic" ]; then
