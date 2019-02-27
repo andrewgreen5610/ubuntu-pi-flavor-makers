@@ -167,6 +167,11 @@ function prepare_oem_config() {
 
         if [ "${FLAVOUR}" == "ubuntu" ]; then
             chroot $R apt-get -y install --no-install-recommends oem-config-slideshow-ubuntu
+        elif [ "${FLAVOUR}" == "ubuntu-budgie" ]; then
+            chroot $R apt-get -y install --no-install-recommends oem-config-slideshow-ubuntu-budgie
+            # Force the slideshow to use Ubuntu Budgie artwork.
+            sed -i 's/oem-config-slideshow-ubuntu/oem-config-slideshow-ubuntu-budgie/' $R/usr/lib/ubiquity/plugins/ubi-usersetup.py
+            sed -i 's/oem-config-slideshow-ubuntu/oem-config-slideshow-ubuntu-budgie/' $R/usr/sbin/oem-config-remove-gtk
         elif [ "${FLAVOUR}" == "ubuntu-mate" ]; then
             chroot $R apt-get -y install --no-install-recommends oem-config-slideshow-ubuntu-mate
             # Force the slideshow to use Ubuntu MATE artwork.
