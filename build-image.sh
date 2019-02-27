@@ -282,20 +282,10 @@ function configure_hardware() {
     chroot $R apt-get -y update
 
     # Firmware Kernel installation
-    if [ "${RELEASE}" == "bionic" ]; then
-      mkdir -p $R/boot/firmware
-      chroot $R apt-get -y --no-install-recommends install linux-image-raspi2
-      chroot $R apt-get -y install linux-firmware-raspi2 u-boot-rpi u-boot-tools
-      rsync -av $R/lib/firmware/4.*-raspi2/device-tree/ $R/boot/firmware/
-    elif [ "${RELEASE}" == "xenial" ]; then
-      chroot $R apt-get -y install libraspberrypi-bin libraspberrypi-dev \
-      libraspberrypi-doc libraspberrypi0 raspberrypi-bootloader rpi-update \
-      bluez-firmware linux-firmware pi-bluetooth
-
-      # Raspberry Pi 3 WiFi firmware. Supplements what is provided in linux-firmware
-      cp -v firmware/* $R/lib/firmware/brcm/
-      chown root:root $R/lib/firmware/brcm/*
-    fi
+    mkdir -p $R/boot/firmware
+    chroot $R apt-get -y --no-install-recommends install linux-image-raspi2
+    chroot $R apt-get -y install linux-firmware-raspi2 u-boot-rpi u-boot-tools
+    rsync -av $R/lib/firmware/4.*-raspi2/device-tree/ $R/boot/firmware/
 
     # pi-top poweroff and brightness utilities
     cp -v files/pi-top-* $R/usr/bin/
@@ -308,29 +298,8 @@ function configure_hardware() {
         chroot $R apt-get -y install xserver-xorg-video-fbturbo
     fi
 
-        if [ "${RELEASE}" == "xenial" ]; then
-          # omxplayer
-          # - Requires: libpcre3 libfreetype6 fonts-freefont-ttf dbus libssl1.0.0 libsmbclient libssh-4
-          cp deb/omxplayer_0.3.7-git20160923-dfea8c9_armhf.deb $R/tmp/omxplayer.deb
-          chroot $R apt-get -y install /tmp/omxplayer.deb
-
-          # Make Ubiquity "compatible" with the Raspberry Pi Foundation kernel.
-          if [ ${OEM_CONFIG} -eq 1 ]; then
-            cp plugininstall-${RELEASE}.py $R/usr/share/ubiquity/plugininstall.py
-          fi
-        fi
-    fi
-
-    if [ "${RELEASE}" == "xenial" ]; then
-      # Install Raspberry Pi system tweaks
-      chroot $R apt-get -y install fbset raspberrypi-sys-mods
-
-      # copies-and-fills
-      # Create /spindel_install so cofi doesn't segfault when chrooted via qemu-user-static
-      touch $R/spindle_install
-      cp deb/raspi-copies-and-fills_0.6_armhf.deb $R/tmp/cofi.deb
-      chroot $R apt-get -y install /tmp/cofi.deb
-    fi
+    # Install Raspberry Pi system tweaks
+    #chroot $R apt-get -y install fbset raspberrypi-sys-mods
 
     # Enable hardware random number generator
     chroot $R apt-get -y install rng-tools
@@ -341,20 +310,12 @@ function configure_hardware() {
     chroot $R systemctl enable resize-fs.service
 
     # Add /boot/config.txt
-    if [ "${RELEASE}" == "bionic" ]; then
-        cp files/config.txt $R/boot/firmware/
-        sed -i 's/#kernel=""/kernel=vmlinuz/' $R/boot/firmware/config.txt
-        sed -i 's/#initramfs initramf.gz 0x00800000/initramfs initrd.img followkernel/' $R/boot/firmware/config.txt
-    elif [ "${RELEASE}" == "xenial" ]; then
-        cp files/config.txt $R/boot/
-    fi
+    cp files/config.txt $R/boot/firmware/
+    sed -i 's/#kernel=""/kernel=vmlinuz/' $R/boot/firmware/config.txt
+    sed -i 's/#initramfs initramf.gz 0x00800000/initramfs initrd.img followkernel/' $R/boot/firmware/config.txt
 
     # Add /boot/cmdline.txt
-    if [ "${RELEASE}" == "bionic" ]; then
-      echo "net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles" > $R/boot/firmware/cmdline.txt
-    elif [ "${RELEASE}" == "xenial" ]; then
-      echo "dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles" > $R/boot/cmdline.txt
-    fi
+    echo "net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles" > $R/boot/firmware/cmdline.txt
 
     # Enable VC4 on composited desktops
     if [ "${FLAVOUR}" == "kubuntu" ] || [ "${FLAVOUR}" == "ubuntu" ] || [ "${FLAVOUR}" == "ubuntu-gnome" ]; then
@@ -378,15 +339,13 @@ LABEL=system-boot  /boot/firmware  vfat   defaults          0  1
 /swapfile          none            swap   sw                0  0
 EOM
 
-    if [ "${RELEASE}" == "bionic" ]; then
-      # Install flash-kernel last so it doesn't try (and fail) to detect the
-      # platform in the chroot.
-      chroot $R apt-get -y install flash-kernel
-      VMLINUZ="$(ls -1 $R/boot/vmlinuz-* | sort | tail -n 1)"
-      cp "${VMLINUZ}" $R/boot/firmware/vmlinuz
-      INITRD="$(ls -1 $R/boot/initrd.img-* | sort | tail -n 1)"
-      cp "${INITRD}" $R/boot/firmware/initrd.img
-    fi
+    # Install flash-kernel last so it doesn't try (and fail) to detect the
+    # platform in the chroot.
+    chroot $R apt-get -y install flash-kernel
+    VMLINUZ="$(ls -1 $R/boot/vmlinuz-* | sort | tail -n 1)"
+    cp "${VMLINUZ}" $R/boot/firmware/vmlinuz
+    INITRD="$(ls -1 $R/boot/initrd.img-* | sort | tail -n 1)"
+    cp "${INITRD}" $R/boot/firmware/initrd.img
 }
 
 function install_software() {
@@ -682,26 +641,6 @@ function stage_03_raspi2() {
 function stage_04_corrections() {
     R=${DEVICE_R}
     mount_system
-
-    if [ "${RELEASE}" == "xenial" ]; then
-      # Add the MATE Desktop PPA for Xenial
-      if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
-        chroot $R apt-add-repository -y ppa:ubuntu-mate-dev/xenial-mate
-        chroot $R apt-get update
-        chroot $R apt-get -y dist-upgrade
-      fi
-
-      # Upgrade Xorg using HWE.
-      chroot $R apt-get install -y --install-recommends \
-      xserver-xorg-core-hwe-16.04 \
-      xserver-xorg-input-all-hwe-16.04 \
-      xserver-xorg-input-evdev-hwe-16.04 \
-      xserver-xorg-input-synaptics-hwe-16.04 \
-      xserver-xorg-input-wacom-hwe-16.04 \
-      xserver-xorg-video-all-hwe-16.04 \
-      xserver-xorg-video-fbdev-hwe-16.04 \
-      xserver-xorg-video-vesa-hwe-16.04
-    fi
 
     # Insert other corrections here.
 
