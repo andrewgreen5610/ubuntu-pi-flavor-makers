@@ -60,12 +60,8 @@ function bootstrap() {
     qemu-debootstrap --verbose --arch=armhf $RELEASE $R http://ports.ubuntu.com/
 }
 
-function generate_locale() {
-    for LOCALE in $(nspawn locale | cut -d'=' -f2 | grep -v : | sed 's/"//g' | uniq); do
-        if [ -n "${LOCALE}" ]; then
-            nspawn locale-gen $LOCALE
-        fi
-    done
+function generate_locale() { 
+    nspawn locale-gen
 }
 
 # Set up initial sources.list
