@@ -243,9 +243,17 @@ function disable_services() {
         nspawn /bin/systemctl disable kerneloops.service
     fi
 
-    # Disable mate-optimus
-    if [ -e $R/usr/share/mate/autostart/mate-optimus.desktop ]; then
-        rm -f $R/usr/share/mate/autostart/mate-optimus.desktop || true
+    # Disable apt-daily, it significantly impacts Pi boot performance.
+    if [ -e $R/usr/lib/apt/apt.systemd.daily ]; then
+        nspawn /bin/systemctl disable apt-daily.service
+        nspawn /bin/systemctl disable apt-daily.timer
+        nspawn /bin/systemctl disable apt-daily-upgrade.timer
+        nspawn /bin/systemctl disable apt-daily-upgrade.service
+    fi
+
+    # Disable fstrim, there are no SSDs here.
+    if [ -e $R/lib/systemd/system/fstrim.timer ]; then
+        nspawn /bin/systemctl disable fstrim.timer
     fi
 }
 
