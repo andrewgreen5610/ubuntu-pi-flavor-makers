@@ -32,8 +32,13 @@ function nspawn() {
     # Make sure the container has a machine-id
     systemd-machine-id-setup --root $R --print
 
-    # Spawn the container, bind mount resolv.conf and set the hostname
-    systemd-nspawn --bind-ro=$BASEDIR/resolv.conf:/etc/resolv.conf --bind=$R/boot/firmware:/boot/firmware --hostname=${FLAVOUR} -D $R "$@"
+    # Bind mount resolv.conf and the firmware, set the hostname and spawn
+    systemd-nspawn \
+      --resolv-conf=off \
+      --bind-ro=$BASEDIR/resolv.conf:/etc/resolv.conf \
+      --bind=$R/boot/firmware:/boot/firmware \
+      --hostname=${FLAVOUR} \
+      -D $R "$@"
 }
 
 function sync_to() {
