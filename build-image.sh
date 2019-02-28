@@ -24,22 +24,16 @@ if [ $(id -u) -ne 0 ]; then
     exit 1
 fi
 
-# Mount host system
-function mount_system() {
-    mount -t proc none $R/proc
-    mount -t sysfs none $R/sys
-    mount -o bind /dev $R/dev
-    mount -o bind /dev/pts $R/dev/pts
-    echo "nameserver 1.1.1.1" > $R/etc/resolv.conf
-}
+function nspawn() {
+    # Create basic resolv.conf for bind mounting inside the container
+    echo "nameserver 1.1.1.1" > $BASEDIR/resolv.conf
+    mkdir -p $R/boot/firmware 2>/dev/null
 
-# Unmount host system
-function umount_system() {
-    umount -l $R/sys
-    umount -l $R/proc
-    umount -l $R/dev/pts
-    umount -l $R/dev
-    echo "" > $R/etc/resolv.conf
+    # Make sure the container has a machine-id
+    systemd-machine-id-setup --root $R --print
+
+    # Spawn the container, bind mount resolv.conf and set the hostname
+    systemd-nspawn --bind-ro=$BASEDIR/resolv.conf:/etc/resolv.conf --bind=$R/boot/firmware:/boot/firmware --hostname=${FLAVOUR} -D $R "$@"
 }
 
 function sync_to() {
@@ -54,16 +48,17 @@ function sync_to() {
 function bootstrap() {
     # Required tools
     apt-get -y install binfmt-support debootstrap f2fs-tools \
-    pxz qemu-user-static rsync ubuntu-keyring whois xz-utils
+    pxz qemu-user-static rsync systemd-container ubuntu-keyring \
+    whois xz-utils
 
     # Use the same base system for all flavours.
     qemu-debootstrap --verbose --arch=armhf $RELEASE $R http://ports.ubuntu.com/
 }
 
 function generate_locale() {
-    for LOCALE in $(chroot $R locale | cut -d'=' -f2 | grep -v : | sed 's/"//g' | uniq); do
+    for LOCALE in $(nspawn locale | cut -d'=' -f2 | grep -v : | sed 's/"//g' | uniq); do
         if [ -n "${LOCALE}" ]; then
-            chroot $R locale-gen $LOCALE
+            nspawn locale-gen $LOCALE
         fi
     done
 }
@@ -86,20 +81,20 @@ EOM
 }
 
 function apt_upgrade() {
-    chroot $R apt-get update
-    chroot $R apt-get -y -u dist-upgrade
+    nspawn apt-get update
+    nspawn apt-get -y -u dist-upgrade
 }
 
 function apt_clean() {
-    chroot $R apt-get -y autoremove
-    chroot $R apt-get clean
+    nspawn apt-get -y autoremove
+    nspawn apt-get clean
 }
 
 # Install Ubuntu standard
 function ubuntu_standard() {
-    chroot $R apt-get -y install ubuntu-minimal^
-    chroot $R apt-get -y install ubuntu-standard^
-    chroot $R apt-get -y install software-properties-common
+    nspawn apt-get -y install ubuntu-minimal^
+    nspawn apt-get -y install ubuntu-standard^
+    nspawn apt-get -y install software-properties-common
 }
 
 # Install meta packages
@@ -112,7 +107,7 @@ function install_meta() {
         local RECOMMENDS=""
     fi
 
-    chroot $R apt-get -y install ${RECOMMENDS} ${META}^
+    nspawn apt-get -y install ${RECOMMENDS} ${META}^
 
     cat <<EOM >$R/usr/local/bin/${1}.sh
 #!/usr/bin/env bash
@@ -123,7 +118,7 @@ service dbus stop
 EOM
 
     chmod +x $R/usr/local/bin/${1}.sh
-    chroot $R /usr/local/bin/${1}.sh
+    nspawn /usr/local/bin/${1}.sh
     rm $R/usr/local/bin/${1}.sh
 
     if [ "${RECOMMENDS}" == "--no-install-recommends" ]; then
@@ -132,10 +127,10 @@ EOM
 }
 
 function create_groups() {
-    chroot $R groupadd -f --system gpio
-    chroot $R groupadd -f --system i2c
-    chroot $R groupadd -f --system input
-    chroot $R groupadd -f --system spi
+    nspawn groupadd -f --system gpio
+    nspawn groupadd -f --system i2c
+    nspawn groupadd -f --system input
+    nspawn groupadd -f --system spi
     cp files/adduser.local $R/usr/local/sbin/
 }
 
@@ -145,48 +140,48 @@ function create_user() {
     local PASSWD=$(mkpasswd -m sha-512 ${USERNAME} ${DATE})
 
     if [ ${OEM_CONFIG} -eq 1 ]; then
-        chroot $R addgroup --gid 29999 oem
-        chroot $R adduser --gecos "OEM Configuration (temporary user)" --add_extra_groups --disabled-password --gid 29999 --uid 29999 ${USERNAME}
+        nspawn addgroup --gid 29999 oem
+        nspawn adduser --gecos "OEM Configuration (temporary user)" --add_extra_groups --disabled-password --gid 29999 --uid 29999 ${USERNAME}
     else
-        chroot $R adduser --gecos "${FLAVOUR_NAME}" --add_extra_groups --disabled-password ${USERNAME}
+        nspawn adduser --gecos "${FLAVOUR_NAME}" --add_extra_groups --disabled-password ${USERNAME}
     fi
-    chroot $R usermod -a -G sudo -p ${PASSWD} ${USERNAME}
+    nspawn usermod -a -G sudo -p ${PASSWD} ${USERNAME}
 }
 
 # Prepare oem-config for first boot.
 function prepare_oem_config() {
     if [ ${OEM_CONFIG} -eq 1 ]; then
         if [ "${FLAVOUR}" == "kubuntu" ]; then
-            chroot $R apt-get -y install --no-install-recommends oem-config-kde ubiquity-frontend-kde ubiquity-ubuntu-artwork
+            nspawn apt-get -y install --no-install-recommends oem-config-kde ubiquity-frontend-kde ubiquity-ubuntu-artwork
         else
-            chroot $R apt-get -y install --no-install-recommends oem-config-gtk ubiquity-frontend-gtk ubiquity-ubuntu-artwork
+            nspawn apt-get -y install --no-install-recommends oem-config-gtk ubiquity-frontend-gtk ubiquity-ubuntu-artwork
         fi
 
         if [ "${FLAVOUR}" == "ubuntu" ]; then
-            chroot $R apt-get -y install --no-install-recommends oem-config-slideshow-ubuntu
+            nspawn apt-get -y install --no-install-recommends oem-config-slideshow-ubuntu
         elif [ "${FLAVOUR}" == "ubuntu-budgie" ]; then
-            chroot $R apt-get -y install --no-install-recommends oem-config-slideshow-ubuntu-budgie
+            nspawn apt-get -y install --no-install-recommends oem-config-slideshow-ubuntu-budgie
             # Force the slideshow to use Ubuntu Budgie artwork.
             sed -i 's/oem-config-slideshow-ubuntu/oem-config-slideshow-ubuntu-budgie/' $R/usr/lib/ubiquity/plugins/ubi-usersetup.py
             sed -i 's/oem-config-slideshow-ubuntu/oem-config-slideshow-ubuntu-budgie/' $R/usr/sbin/oem-config-remove-gtk
         elif [ "${FLAVOUR}" == "ubuntu-mate" ]; then
-            chroot $R apt-get -y install --no-install-recommends oem-config-slideshow-ubuntu-mate
+            nspawn apt-get -y install --no-install-recommends oem-config-slideshow-ubuntu-mate
             # Force the slideshow to use Ubuntu MATE artwork.
             sed -i 's/oem-config-slideshow-ubuntu/oem-config-slideshow-ubuntu-mate/' $R/usr/lib/ubiquity/plugins/ubi-usersetup.py
             sed -i 's/oem-config-slideshow-ubuntu/oem-config-slideshow-ubuntu-mate/' $R/usr/sbin/oem-config-remove-gtk
         fi
         cp -a $R/usr/lib/oem-config/oem-config.service $R/lib/systemd/system
         cp -a $R/usr/lib/oem-config/oem-config.target $R/lib/systemd/system
-        chroot $R /bin/systemctl enable oem-config.service
-        chroot $R /bin/systemctl enable oem-config.target
-        chroot $R /bin/systemctl set-default oem-config.target
+        nspawn /bin/systemctl enable oem-config.service
+        nspawn /bin/systemctl enable oem-config.target
+        nspawn /bin/systemctl set-default oem-config.target
     fi
 }
 
 function configure_ssh() {
-    chroot $R apt-get -y install openssh-server sshguard
-    chroot $R /bin/systemctl disable ssh.service
-    chroot $R /bin/systemctl disable sshguard.service
+    nspawn apt-get -y install openssh-server sshguard
+    nspawn /bin/systemctl disable ssh.service
+    nspawn /bin/systemctl disable sshguard.service
 }
 
 function configure_network() {
@@ -210,32 +205,32 @@ function disable_services() {
 
     # Disable irqbalance because it is of little, if any, benefit on ARM.
     if [ -e $R/etc/init.d/irqbalance ]; then
-        chroot $R /bin/systemctl disable irqbalance
+        nspawn /bin/systemctl disable irqbalance
     fi
 
     # Disable TLP because it is redundant on ARM devices.
     if [ -e $R/etc/default/tlp ]; then
         sed -i s'/TLP_ENABLE=1/TLP_ENABLE=0/' $R/etc/default/tlp
-        chroot $R /bin/systemctl disable tlp.service
-        chroot $R /bin/systemctl disable tlp-sleep.service
+        nspawn /bin/systemctl disable tlp.service
+        nspawn /bin/systemctl disable tlp-sleep.service
     fi
 
     # Disable apport because these images are not official
     if [ -e $R/etc/default/apport ]; then
         sed -i s'/enabled=1/enabled=0/' $R/etc/default/apport
-        chroot $R /bin/systemctl disable apport.service
-        chroot $R /bin/systemctl disable apport-forward.socket
+        nspawn /bin/systemctl disable apport.service
+        nspawn /bin/systemctl disable apport-forward.socket
     fi
 
     # Disable whoopsie because these images are not official
     if [ -e $R/usr/bin/whoopsie ]; then
-        chroot $R /bin/systemctl disable whoopsie.service
+        nspawn /bin/systemctl disable whoopsie.service
     fi
 
     # Disable kerneloops because these images are not official
     if [ -e $R/usr/sbin/kerneloops ]; then
         sed -i s'/ENABLED=1/ENABLED=0/' $R/etc/default/kerneloops
-        chroot $R /bin/systemctl disable kerneloops.service
+        nspawn /bin/systemctl disable kerneloops.service
     fi
 
     # Disable mate-optimus
@@ -248,19 +243,18 @@ function configure_hardware() {
     local FS="${1}"
 
     # Install the RPi PPA
-    chroot $R apt-add-repository --yes --no-update ppa:ubuntu-pi-flavour-makers/ppa
-    chroot $R apt-get -y update
+    nspawn apt-add-repository --yes --no-update ppa:ubuntu-pi-flavour-makers/ppa
+    nspawn apt-get -y update
 
     # Firmware Kernel installation
-    mkdir -p $R/boot/firmware
-    chroot $R apt-get -y --no-install-recommends install linux-image-raspi2
-    chroot $R apt-get -y install linux-firmware-raspi2 u-boot-rpi u-boot-tools
-    rsync -av $R/lib/firmware/4.*-raspi2/device-tree/ $R/boot/firmware/
+    nspawn apt-get -y --no-install-recommends install linux-image-raspi2
+    nspawn apt-get -y install linux-firmware-raspi2 u-boot-rpi u-boot-tools
+    rsync -aHAXx $R/lib/firmware/4.*-raspi2/device-tree/ $R/boot/firmware/
 
     # Install fbturbo drivers on non composited desktop OS
     # fbturbo causes VC4 to fail
     if [ "${FLAVOUR}" == "lubuntu" ] || [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
-        chroot $R apt-get -y install xserver-xorg-video-fbturbo
+        nspawn apt-get -y install xserver-xorg-video-fbturbo
     fi
 
     # pi-top poweroff and brightness utilities
@@ -269,12 +263,12 @@ function configure_hardware() {
     chmod +x $R/usr/bin/pi-top-*
 
     # Install the Ubuntu port of raspi-config & Raspberry Pi system tweaks
-    chroot $R apt-get -y install raspi-config raspberrypi-sys-mods
+    nspawn apt-get -y install raspi-config raspberrypi-sys-mods
     # Enable / partition resize
-    chroot $R systemctl enable resize-fs.service
+    #nspawn systemctl enable resize-fs.service
 
     # Install bluetooth firmware and helpers
-    chroot $R apt-get -y install pi-bluetooth
+    nspawn apt-get -y install pi-bluetooth
 
     # Add /boot/config.txt
     cp files/config.txt $R/boot/firmware/
@@ -303,7 +297,7 @@ EOM
 
     # Install flash-kernel last so it doesn't try (and fail) to detect the
     # platform in the chroot.
-    chroot $R apt-get -y install flash-kernel
+    nspawn apt-get -y install flash-kernel
     VMLINUZ="$(ls -1 $R/boot/vmlinuz-* | sort | tail -n 1)"
     cp "${VMLINUZ}" $R/boot/firmware/vmlinuz
     INITRD="$(ls -1 $R/boot/initrd.img-* | sort | tail -n 1)"
@@ -314,14 +308,14 @@ function install_software() {
     return 0
 
     # Python
-    chroot $R apt-get -y install \
+    nspawn apt-get -y install \
     python-minimal python3-minimal \
     python-dev python3-dev \
     python-pip python3-pip \
     python-setuptools python3-setuptools
 
     # Python extras a Raspberry Pi hacker expects to be available ;-)
-    chroot $R apt-get -y install \
+    nspawn apt-get -y install \
     raspi-gpio \
     python-rpi.gpio python3-rpi.gpio \
     python-gpiozero python3-gpiozero \
@@ -349,38 +343,38 @@ function install_software() {
     python-rtimulib python3-rtimulib \
     python-pygame
 
-    chroot $R pip2 install codebug_tether
-    chroot $R pip3 install codebug_tether
+    nspawn pip2 install codebug_tether
+    nspawn pip3 install codebug_tether
 
     if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
         # Install the Minecraft PPA
-        chroot $R apt-add-repository -y ppa:flexiondotorg/minecraft
-        chroot $R apt-add-repository -y ppa:ubuntu-mate-dev/welcome
-        chroot $R apt-get update
+        nspawn apt-add-repository -y ppa:flexiondotorg/minecraft
+        nspawn apt-add-repository -y ppa:ubuntu-mate-dev/welcome
+        nspawn apt-get update
 
         # Python IDLE
-        chroot $R apt-get -y install idle idle3
+        nspawn apt-get -y install idle idle3
 
         # YouTube DL
-        chroot $R apt-get -y install ffmpeg rtmpdump
-        chroot $R apt-get -y --no-install-recommends install ffmpeg youtube-dl
-        chroot $R apt-get -y install youtube-dlg
+        nspawn apt-get -y install ffmpeg rtmpdump
+        nspawn apt-get -y --no-install-recommends install ffmpeg youtube-dl
+        nspawn apt-get -y install youtube-dlg
 
         # Scratch (nuscratch)
         # - Requires: scratch and used to require wiringpi
         cp deb/scratch_1.4.20131203-2_all.deb $R/tmp/scratch.deb
         cp deb/wiringpi_2.32_armhf.deb $R/tmp/wiringpi.deb
-        chroot $R apt-get -y install /tmp/wiringpi.deb
-        chroot $R apt-get -y install /tmp/scratch.deb
-        chroot $R apt-get -y install nuscratch
+        nspawn apt-get -y install /tmp/wiringpi.deb
+        nspawn apt-get -y install /tmp/scratch.deb
+        nspawn apt-get -y install nuscratch
 
         # Minecraft
-        chroot $R apt-get -y install minecraft-pi python-picraft python3-picraft --allow-downgrades
+        nspawn apt-get -y install minecraft-pi python-picraft python3-picraft --allow-downgrades
 
         # Sonic Pi
         cp files/jackd.conf $R/tmp/
-        chroot $R debconf-set-selections -v /tmp/jackd.conf
-        chroot $R apt-get -y install sonic-pi
+        nspawn debconf-set-selections -v /tmp/jackd.conf
+        nspawn apt-get -y install sonic-pi
     fi
 }
 
@@ -528,13 +522,11 @@ function stage_01_base() {
     if [ ! -f "${BASE_R}/tmp/.stage_base" ]; then
         R="${BASE_R}"
         bootstrap
-        mount_system
         generate_locale
         apt_sources
         apt_upgrade
         ubuntu_standard
         apt_clean
-        umount_system
         touch "$R/tmp/.stage_base"
         sync_to "${DESKTOP_R}"
     fi
@@ -546,11 +538,10 @@ function stage_02_desktop() {
         sync_to "${DESKTOP_R}"
         
         R="${DESKTOP_R}"
-        mount_system
         if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
             # Install the RPi PPA to get the latest meta package for ubuntu-mate
-            chroot $R apt-add-repository --yes --no-update ppa:ubuntu-pi-flavour-makers/ppa
-            chroot $R apt-get -y update
+            nspawn apt-add-repository --yes --no-update ppa:ubuntu-pi-flavour-makers/ppa
+            nspawn apt-get -y update
             install_meta ${FLAVOUR}-core
             install_meta ${FLAVOUR}-desktop
         elif [ "${FLAVOUR}" == "xubuntu" ]; then
@@ -568,7 +559,6 @@ function stage_02_desktop() {
         disable_services
         apt_upgrade
         apt_clean
-        umount_system
         clean_up
         sync_to ${DEVICE_R}
         make_tarball
@@ -582,25 +572,21 @@ function stage_03_raspi2() {
     sync_to ${DEVICE_R}
 
     R=${DEVICE_R}
-    mount_system
     configure_hardware ${FS_TYPE}
     install_software
     apt_upgrade
     apt_clean
     clean_up
-    umount_system
     make_raspi2_image ${FS_TYPE} ${FS_SIZE}
 }
 
 function stage_04_corrections() {
     R=${DEVICE_R}
-    mount_system
 
     # Insert other corrections here.
 
     apt_clean
     clean_up
-    umount_system
     make_raspi2_image ${FS_TYPE} ${FS_SIZE}
 }
 
