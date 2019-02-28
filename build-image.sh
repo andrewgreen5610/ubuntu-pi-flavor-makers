@@ -200,6 +200,14 @@ ff02::2         ip6-allrouters
 
 127.0.1.1       ${FLAVOUR}
 EOM
+
+    # Configure netplan to delegate to NetworkManager
+    cat <<EOM >$R/etc/netplan/01-network-manager-all.yaml
+# Let NetworkManager manage all devices on this system
+network:
+  version: 2
+  renderer: NetworkManager
+EOM
 }
 
 function disable_services() {
