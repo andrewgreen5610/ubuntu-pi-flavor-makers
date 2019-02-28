@@ -229,6 +229,7 @@ function disable_services() {
         sed -i s'/enabled=1/enabled=0/' $R/etc/default/apport
         nspawn /bin/systemctl disable apport.service
         nspawn /bin/systemctl disable apport-forward.socket
+        nspawn /bin/systemctl disable apport-autoreport.path
     fi
 
     # Disable whoopsie because these images are not official
