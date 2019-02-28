@@ -97,8 +97,8 @@ function apt_clean() {
 
 # Install Ubuntu standard
 function ubuntu_standard() {
-    nspawn apt-get -y install ubuntu-minimal^
-    nspawn apt-get -y install ubuntu-standard^
+    nspawn apt-get -y install ubuntu-minimal
+    nspawn apt-get -y install ubuntu-standard
     nspawn apt-get -y install software-properties-common
 }
 
