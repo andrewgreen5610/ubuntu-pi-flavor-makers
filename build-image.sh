@@ -323,7 +323,7 @@ function configure_hardware() {
     fi
 
     # Add /boot/firmware/cmdline.txt
-    echo "net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles" > $R/boot/firmware/cmdline.txt
+    echo "net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS_TYPE} elevator=deadline fsck.repair=yes rootwait splash plymouth.ignore-serial-consoles" > $R/boot/firmware/cmdline.txt
 
     # Enable VC4 on composited desktops
     if [ "${FLAVOUR}" == "kubuntu" ] || [ "${FLAVOUR}" == "ubuntu" ] || [ "${FLAVOUR}" == "ubuntu-budgie" ]; then
