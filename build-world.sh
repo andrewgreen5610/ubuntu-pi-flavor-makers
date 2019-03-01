@@ -24,10 +24,8 @@ if [ $(id -u) -ne 0 ]; then
     exit 1
 fi
 
-for FLAVOUR in ubuntu-minimal ubuntu-standard lubuntu xubuntu ubuntu-mate; do
+for FLAVOUR in lubuntu ubuntu-mate xubuntu; do
     echo "Building ${FLAVOUR}"
     ./link-settings.sh "${FLAVOUR}"
     ./build-image.sh
-    ./build-umount.sh
-    ./build-umount.sh
 done
