@@ -19,6 +19,11 @@ else
     exit 1
 fi
 
+if [ "${FS_TYPE}" != "ext4" ] && [ "${FS_TYPE}" != "f2fs" ]; then
+    echo "ERROR! Unsupport filesystem requested. Exitting."
+    exit 1
+fi
+
 if [ $(id -u) -ne 0 ]; then
     echo "ERROR! Must be root."
     exit 1
@@ -444,14 +449,8 @@ function clean_up() {
 
 function make_raspi2_image() {
     # Build the image file
-    local FS="${1}"
-    local SIZE_IMG="${2}"
+    local SIZE_IMG="${1}"
     local SIZE_BOOT="128MiB"
-
-    if [ "${FS}" != "ext4" ] && [ "${FS}" != 'f2fs' ]; then
-        echo "ERROR! Unsupport filesystem requested. Exitting."
-        exit 1
-    fi
 
     # Remove old images.
     rm -f "${BASEDIR}/${IMAGE}" || true
