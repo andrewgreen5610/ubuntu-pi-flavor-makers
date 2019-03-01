@@ -404,7 +404,7 @@ function clean_up() {
 }
 
 # ext4 remains the default - https://forum.armbian.com/topic/4167-f2fs-revisited/
-function make_raspi2_image() {
+function make_raspi_image() {
     if [ "${FS_TYPE}" == "f2fs" ]; then
         nspawn apt-get -y install f2fs-tools
     fi
@@ -548,7 +548,7 @@ function stage_03_raspi() {
     apt_upgrade
     apt_clean
     clean_up
-    make_raspi2_image "${FS_SIZE}"
+    make_raspi_image "${FS_SIZE}"
 }
 
 function stage_04_corrections() {
@@ -558,7 +558,7 @@ function stage_04_corrections() {
 
     apt_clean
     clean_up
-    make_raspi2_image "${FS_SIZE}"
+    make_raspi_image "${FS_SIZE}"
 }
 
 stage_01_base
