@@ -336,80 +336,11 @@ EOM
     cp "${VMLINUZ}" $R/boot/firmware/vmlinuz
     INITRD="$(ls -1 $R/boot/initrd.img-* | sort | tail -n 1)"
     cp "${INITRD}" $R/boot/firmware/initrd.img
-}
 
-function install_software() {
-    return 0
-
-    # Python
-    nspawn apt-get -y install \
-    python-minimal python3-minimal \
-    python-dev python3-dev \
-    python-pip python3-pip \
-    python-setuptools python3-setuptools
-
-    # Python extras a Raspberry Pi hacker expects to be available ;-)
-    nspawn apt-get -y install \
-    raspi-gpio \
-    python-rpi.gpio python3-rpi.gpio \
-    python-gpiozero python3-gpiozero \
-    pigpio python-pigpio python3-pigpio \
-    python-serial python3-serial \
-    python-spidev python3-spidev \
-    python-smbus python3-smbus \
-    python-astropi python3-astropi \
-    python-drumhat python3-drumhat \
-    python-envirophat python3-envirophat \
-    python-pianohat python3-pianohat \
-    python-pantilthat python3-pantilthat \
-    python-scrollphat python3-scrollphat \
-    python-st7036 python3-st7036 \
-    python-sn3218 python3-sn3218 \
-    python-piglow python3-piglow \
-    python-microdotphat python3-microdotphat \
-    python-mote python3-mote \
-    python-motephat python3-motephat \
-    python-explorerhat python3-explorerhat \
-    python-rainbowhat python3-rainbowhat \
-    python-sense-hat python3-sense-hat \
-    python-sense-emu python3-sense-emu sense-emu-tools \
-    python-picamera python3-picamera \
-    python-rtimulib python3-rtimulib \
-    python-pygame
-
-    nspawn pip2 install codebug_tether
-    nspawn pip3 install codebug_tether
-
-    if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
-        # Install the Minecraft PPA
-        nspawn apt-add-repository -y ppa:flexiondotorg/minecraft
-        nspawn apt-add-repository -y ppa:ubuntu-mate-dev/welcome
-        nspawn apt-get update
-
-        # Python IDLE
-        nspawn apt-get -y install idle idle3
-
-        # YouTube DL
-        nspawn apt-get -y install ffmpeg rtmpdump
-        nspawn apt-get -y --no-install-recommends install ffmpeg youtube-dl
-        nspawn apt-get -y install youtube-dlg
-
-        # Scratch (nuscratch)
-        # - Requires: scratch and used to require wiringpi
-        cp deb/scratch_1.4.20131203-2_all.deb $R/tmp/scratch.deb
-        cp deb/wiringpi_2.32_armhf.deb $R/tmp/wiringpi.deb
-        nspawn apt-get -y install /tmp/wiringpi.deb
-        nspawn apt-get -y install /tmp/scratch.deb
-        nspawn apt-get -y install nuscratch
-
-        # Minecraft
-        nspawn apt-get -y install minecraft-pi python-picraft python3-picraft --allow-downgrades
-
-        # Sonic Pi
-        cp files/jackd.conf $R/tmp/
-        nspawn debconf-set-selections -v /tmp/jackd.conf
-        nspawn apt-get -y install sonic-pi
-    fi
+    #nspawn flash-kernel --machine "Raspberry Pi 2 Model B"
+    #nspawn flash-kernel --machine "Raspberry Pi 3 Model B"
+    #nspawn mkknlimg --dtok /usr/lib/u-boot/rpi_2/u-boot.bin /boot/firmware/uboot.bin
+    #rm -f $R/boot/firmware/*.bak
 }
 
 function clean_up() {
@@ -601,7 +532,6 @@ function stage_03_raspi2() {
 
     R=${DEVICE_R}
     configure_hardware
-    install_software
     apt_upgrade
     apt_clean
     clean_up
