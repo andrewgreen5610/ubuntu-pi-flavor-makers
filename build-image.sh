@@ -396,7 +396,7 @@ function make_raspi2_image() {
 
     # Build the image file
     local SIZE_IMG="${1}"
-    local SIZE_BOOT="128MiB"
+    local SIZE_BOOT="200MiB"
 
     # Remove old images.
     rm -f "${BASEDIR}/${IMAGE}"
