@@ -62,7 +62,7 @@ function bootstrap() {
     whois xz-utils
 
     # Use the same base system for all flavours.
-    qemu-debootstrap --verbose --arch=armhf $RELEASE $R http://ports.ubuntu.com/
+    qemu-debootstrap --verbose --arch=$ARCHITECTURE $RELEASE $R http://ports.ubuntu.com/
 }
 
 function generate_locale() { 
