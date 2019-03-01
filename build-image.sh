@@ -278,7 +278,12 @@ function configure_hardware() {
     # Firmware Kernel installation
     nspawn apt-get -y --no-install-recommends install linux-image-raspi2
     nspawn apt-get -y install linux-firmware-raspi2 u-boot-rpi u-boot-tools
-    rsync -aHAXx $R/lib/firmware/4.*-raspi2/device-tree/ $R/boot/firmware/
+    if [ "${ARCHITECTURE}" == "arm64" ]; then
+        rsync -aHAXx $R/lib/firmware/4.*-raspi2/device-tree/broadcom/ $R/boot/firmware/
+        rsync -aHAXx $R/lib/firmware/4.*-raspi2/device-tree/overlays/ $R/boot/firmware/overlays/
+    else
+        rsync -aHAXx $R/lib/firmware/4.*-raspi2/device-tree/ $R/boot/firmware/
+    fi
 
     # Install fbturbo drivers on non composited desktop OS
     # fbturbo causes VC4 to fail
@@ -303,6 +308,9 @@ function configure_hardware() {
     cp files/config.txt $R/boot/firmware/
     sed -i 's/#kernel=""/kernel=vmlinuz/' $R/boot/firmware/config.txt
     sed -i 's/#initramfs initramf.gz 0x00800000/initramfs initrd.img followkernel/' $R/boot/firmware/config.txt
+    if [ "${ARCHITECTURE}" == "arm64" ]; then
+        echo "arm_control=0x200" >> $R/boot/firmware/config.txt
+    fi
 
     # Add /boot/firmware/cmdline.txt
     echo "net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS} elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles" > $R/boot/firmware/cmdline.txt
