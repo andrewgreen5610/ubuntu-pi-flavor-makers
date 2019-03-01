@@ -65,8 +65,18 @@ function bootstrap() {
     qemu-debootstrap --verbose --arch=$ARCHITECTURE $RELEASE $R http://ports.ubuntu.com/
 }
 
-function generate_locale() { 
-    nspawn locale-gen
+function generate_locale() {
+    cat <<EOM >$R/usr/local/bin/generate-locale.sh
+#!/usr/bin/env bash
+for LOCALE in $(locale | cut -d'=' -f2 | grep -v : | sed 's/"//g' | uniq); do
+    if [ -n "\$LOCALE" ]; then
+        locale-gen \$LOCALE
+    fi
+done
+EOM
+    chmod +x $R/usr/local/bin/generate-locale.sh
+    nspawn /usr/local/bin/generate-locale.sh
+    rm -f $R/usr/local/bin/generate-locale.sh
 }
 
 # Set up initial sources.list
