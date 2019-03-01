@@ -441,7 +441,7 @@ function make_raspi2_image() {
     if [ "${FS_TYPE}" == "ext4" ]; then
         mkfs.ext4 -L writable -m 0 "${ROOT_LOOP}"
     elif [ "${FS_TYPE}" == "f2fs" ]; then
-        mkfs.f2fs -l writable -o 1 "${ROOT_LOOP}"
+        mkfs.f2fs -l writable -o 1 -t 0 "${ROOT_LOOP}"
     fi
 
     MOUNTDIR="${BUILDDIR}/mount"
