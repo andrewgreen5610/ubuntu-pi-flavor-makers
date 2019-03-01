@@ -263,6 +263,16 @@ function disable_services() {
     if [ -e $R/lib/systemd/system/fstrim.timer ]; then
         nspawn /bin/systemctl disable fstrim.timer
     fi
+
+    # Disable ureadahead, of no benefit for the Pi.
+    if [ -e $R/sbin/ureadahead ]; then
+        nspawn /bin/systemctl disable ureadahead
+    fi
+
+    # Disable mlocate
+    if [ -e /usr/bin/updatedb.mlocate ]; then
+        chmod -x $R/usr/bin/updatedb.mlocate
+    fi
 }
 
 function configure_hardware() {
