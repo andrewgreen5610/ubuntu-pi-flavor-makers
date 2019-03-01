@@ -517,10 +517,10 @@ function stage_02_desktop() {
         
         R="${DESKTOP_R}"
         if [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
-            install_meta ${FLAVOUR}-core
-            install_meta ${FLAVOUR}-desktop
+            install_meta "${FLAVOUR}-core"
+            install_meta "${FLAVOUR}-desktop"
         else
-            install_meta ${FLAVOUR}-desktop
+            install_meta "${FLAVOUR}-desktop"
         fi
 
         create_groups
@@ -532,23 +532,23 @@ function stage_02_desktop() {
         apt_upgrade
         apt_clean
         clean_up
-        sync_to ${DEVICE_R}
+        sync_to "${DEVICE_R}"
         make_tarball
         touch "${DESKTOP_R}/tmp/.stage_desktop"
     fi
 }
 
-function stage_03_raspi()
+function stage_03_raspi() {
     # Always start with a clean rootfs
     R="${DESKTOP_R}"
-    sync_to ${DEVICE_R}
+    sync_to "${DEVICE_R}"
 
     R=${DEVICE_R}
     configure_hardware
     apt_upgrade
     apt_clean
     clean_up
-    make_raspi2_image ${FS_SIZE}
+    make_raspi2_image "${FS_SIZE}"
 }
 
 function stage_04_corrections() {
@@ -558,7 +558,7 @@ function stage_04_corrections() {
 
     apt_clean
     clean_up
-    make_raspi2_image ${FS_SIZE}
+    make_raspi2_image "${FS_SIZE}"
 }
 
 stage_01_base
