@@ -126,18 +126,6 @@ function install_meta() {
 
     nspawn apt-get -y install ${RECOMMENDS} ${META}^
 
-    cat <<EOM >$R/usr/local/bin/${1}.sh
-#!/usr/bin/env bash
-service dbus start
-apt-get -f install
-dpkg --configure -a
-service dbus stop
-EOM
-
-    chmod +x $R/usr/local/bin/${1}.sh
-    nspawn /usr/local/bin/${1}.sh
-    rm $R/usr/local/bin/${1}.sh
-
     if [ "${RECOMMENDS}" == "--no-install-recommends" ]; then
         rm $R/etc/apt/apt.conf.d/99noinstallrecommends
     fi
