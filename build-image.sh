@@ -111,9 +111,6 @@ function ubuntu_standard() {
     nspawn apt-get -y install ubuntu-minimal
     nspawn apt-get -y install ubuntu-standard
     nspawn apt-get -y install software-properties-common
-    if [ "${FS_TYPE}" == "f2fs" ]; then
-        nspawn apt-get -y install f2fs-tools
-    fi
 }
 
 # Install meta packages
@@ -397,13 +394,18 @@ function clean_up() {
     rm -f $R/boot/firmware/*.bak
 }
 
+# ext4 remains the default - https://forum.armbian.com/topic/4167-f2fs-revisited/
 function make_raspi2_image() {
+    if [ "${FS_TYPE}" == "f2fs" ]; then
+        nspawn apt-get -y install f2fs-tools
+    fi
+
     # Build the image file
     local SIZE_IMG="${1}"
     local SIZE_BOOT="128MiB"
 
     # Remove old images.
-    rm -f "${BASEDIR}/${IMAGE}" || true
+    rm -f "${BASEDIR}/${IMAGE}"
 
     # Create an empty file file.
     dd if=/dev/zero of="${BASEDIR}/${IMAGE}" bs=1MB count=1
