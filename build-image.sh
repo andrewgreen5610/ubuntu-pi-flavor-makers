@@ -293,12 +293,6 @@ function configure_hardware() {
         rsync -aHAXx $R/lib/firmware/4.*-raspi2/device-tree/ $R/boot/firmware/
     fi
 
-    # Install fbturbo drivers on non composited desktop OS
-    # fbturbo causes VC4 to fail
-    if [ "${FLAVOUR}" == "lubuntu" ] || [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
-        nspawn apt-get -y install xserver-xorg-video-fbturbo
-    fi
-
     # Install the Ubuntu port of raspi-config & Raspberry Pi system tweaks
     nspawn apt-get -y install raspi-config raspberrypi-sys-mods
     # Enable / partition resize
@@ -338,9 +332,11 @@ function configure_hardware() {
     # Add /boot/firmware/cmdline.txt
     echo "net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS_TYPE} elevator=deadline fsck.repair=yes rootwait plymouth.ignore-serial-consoles" > $R/boot/firmware/cmdline.txt
 
-    # Enable VC4 on composited desktops
-    if [ "${FLAVOUR}" == "kubuntu" ] || [ "${FLAVOUR}" == "ubuntu" ] || [ "${FLAVOUR}" == "ubuntu-budgie" ]; then
-      echo "dtoverlay=vc4-kms-v3d" >> $R/boot/firmware/config.txt
+    # Enable experimental VC4 (if spedicifed) or install fbturbo drivers
+    if [ ${ENABLE_VC4} -eq 1 ]; then
+        echo "dtoverlay=vc4-kms-v3d" >> $R/boot/firmware/config.txt
+    else
+        nspawn apt-get -y install xserver-xorg-video-fbturbo    
     fi
 
     # Create swapfile
