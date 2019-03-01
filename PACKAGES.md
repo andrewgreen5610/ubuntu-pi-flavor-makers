@@ -18,28 +18,49 @@ Sadly COFI fails to build in a PPA :-(
 
 ## Applications
 
-These are ported.
+### In my PPA or Ubuntu Bionic
 
-  * http://archive.raspberrypi.org/debian/pool/main/m/minecraft-pi/
+  * raspi-config - https://github.com/flexiondotorg/raspi-config
+    *  http://archive.raspberrypi.org/debian/pool/main/r/raspi-config/
+  * sonic-pi - Ubuntu since Xenial
+
+### Not in my PPA
+
+  * minecraft-pi - http://archive.raspberrypi.org/debian/pool/main/m/minecraft-pi/
+  * nuscratch - http://archive.raspberrypi.org/debian/pool/main/n/nuscratch/
+    * Modify wrapper in debian/scratch to just be "sudo "
+  *  vlc
+    * Drop debhelper to 11
+    * libaom uploaded to PPA.
+    * libspatialaudio uploaded to PPA.
+
+## GPIO and HATs
+
+### In my PPA or Ubuntu Bionic
+
+  * rpi.gpio - https://launchpad.net/~waveform/+archive/ubuntu/pkg
+  * pigpio- https://launchpad.net/~waveform/+archive/ubuntu/pkg
+  * wiringpi - https://launchpad.net/~waveform/+archive/ubuntu/pkg
+  * gpiozero - https://packages.debian.org/sid/python-gpiozero
+
+#### In crazy-pi
+
+  * picamera - http://archive.raspberrypi.org/debian/pool/main/p/picamera/
+  * rtimulib - http://archive.raspberrypi.org/debian/pool/main/r/rtimulib/
+  * astropi - http://archive.raspberrypi.org/debian/pool/main/a/astropi/
+
+### Not yet in my Bionic PPA
+
   * http://archive.raspberrypi.org/debian/pool/main/r/raspi-gpio/
-  * http://archive.raspberrypi.org/debian/pool/main/s/sonic-pi/
-  * http://archive.raspberrypi.org/debian/pool/main/p/picamera/
-  * http://archive.raspberrypi.org/debian/pool/main/n/nuscratch/            (Modify wrapper in debian/scratch to just be "sudo ")
-  * http://archive.raspberrypi.org/debian/pool/main/r/rtimulib/
-  * http://archive.raspberrypi.org/debian/pool/main/r/raspi-config/
-  * http://archive.raspberrypi.org/debian/pool/main/r/rpi.gpio/             (debian/control Just python3 and python3-dev. debian/rules only python2.7 and python3.5)
   * http://archive.raspberrypi.org/debian/pool/main/s/spidev/
   * http://archive.raspberrypi.org/debian/pool/main/c/codebug-i2c-tether/   (Hardcode target Python 3.x in debian/rules)
   * http://archive.raspberrypi.org/debian/pool/main/c/compoundpi/
   * http://archive.raspberrypi.org/debian/pool/main/p/python-sense-hat/     (debian/control add B-D python-numpy, python3-numpy)
-  * http://archive.raspberrypi.org/debian/pool/main/a/astropi/
   * http://archive.raspberrypi.org/debian/pool/main/s/sense-hat/            (add python-numpy/pil/rtmulib to B-D)
   * http://archive.raspberrypi.org/debian/pool/main/p/picraft/
-  * http://archive.raspberrypi.org/debian/pool/main/g/gpiozero/
   * http://archive.raspberrypi.org/debian/pool/main/d/drumhat/
   * http://archive.raspberrypi.org/debian/pool/main/e/envirohat/
-  * http://archive.raspberrypi.org/debian/pool/main/p/pianohat/
-  * http://archive.raspberrypi.org/debian/pool/main/p/pigpio/
+  * http://archive.raspberrypi.org/debian/pool/main/p/pianohat/ 
   * http://archive.raspberrypi.org/debian/pool/main/s/sense-emu/
   * http://archive.raspberrypi.org/debian/pool/main/p/pantilthat/
   * http://archive.raspberrypi.org/debian/pool/main/s/scrollphat/
@@ -51,7 +72,6 @@ These are ported.
   * http://archive.raspberrypi.org/debian/pool/main/m/motephat/
   * http://archive.raspberrypi.org/debian/pool/main/e/explorerhat/
 
-
 These are pending.
 
   * https://archive.raspberrypi.org/debian/pool/main/p/pgzero/pgzero_1.1-1.dsc (Requires python3-pygame)
@@ -60,8 +80,6 @@ These are pending.
   * http://repozytorium.mati75.eu/raspbian/pool/main/q/qt5ct/
   * http://repozytorium.mati75.eu/raspbian/pool/main/f/ffmpeg/ffmpeg_3.2-2~bpo8%2B2.dsc
   * https://twolife.be/raspbian/pool/main/ffmpeg/ffmpeg_3.2-2~bpo8+2+rpi1.dsc - Has Pi optimizations
-  * http://archive.raspberrypi.org/debian/pool/main/p/pgzero/
-  * https://archive.raspberrypi.org/debian/pool/main/e/epiphany-browser/
 
 These FTBFS.
 
