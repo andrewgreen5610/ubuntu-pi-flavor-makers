@@ -449,7 +449,7 @@ function make_raspi2_image() {
     mount -v "${ROOT_LOOP}" "${MOUNTDIR}" -t "${FS_TYPE}"
     mkdir -p "${MOUNTDIR}/boot/firmware"
     mount -v "${BOOT_LOOP}" "${MOUNTDIR}/boot/firmware" -t vfat
-    rsync -aHAXx "$R/" "${MOUNTDIR}/"
+    sync_to "${MOUNTDIR}"
     sync
     umount -l "${MOUNTDIR}/boot/firmware"
     umount -l "${MOUNTDIR}"
