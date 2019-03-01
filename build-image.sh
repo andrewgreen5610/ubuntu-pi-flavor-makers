@@ -216,9 +216,9 @@ EOM
 
 function disable_services() {
     # Disable brltty because it spams syslog with SECCOMP errors
-    if [ -e $R/sbin/brltty ]; then
-        chroot $R /bin/systemctl disable brltty.service
-    fi
+    #if [ -e $R/sbin/brltty ]; then
+    #    nspawn /bin/systemctl disable brltty.service
+    #fi
 
     # Disable irqbalance because it is of little, if any, benefit on ARM.
     if [ -e $R/etc/init.d/irqbalance ]; then
