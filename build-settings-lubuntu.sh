@@ -23,35 +23,46 @@ FLAVOUR="lubuntu"
 FLAVOUR_NAME="Lubuntu"
 RELEASE="bionic"
 VERSION="18.04.2"
-QUALITY=""
-USERNAME="${FLAVOUR}"
+QUALITY="-alpha"
+ARCHITECTURE="armhf"
 
 # Either 'ext4' or 'f2fs'
 FS_TYPE="ext4"
 
 # Target image size, will be represented in GB
-FS_SIZE=4
+if [ "${FS_TYPE}" == "ext4" ]; then
+    FS_SIZE=5
+elif [ "${FS_TYPE}" == "f2fs" ]; then
+    FS_SIZE=6
+fi
+
+if [ "${ARCHITECTURE}" == "armhf" ]; then
+    SUB_ARCH="raspi"
+elif [ "${ARCHITECTURE}" == "arm64" ]; then
+    SUB_ARCH="raspi3"
+fi
 
 # Either 0 or 1.
 # - 0 don't make generic rootfs tarball
 # - 1 make a generic rootfs tarball
 MAKE_TARBALL=0
 
-TARBALL="${FLAVOUR}-${VERSION}${QUALITY}-desktop-armhf-rootfs.tar.bz2"
-IMAGE="${FLAVOUR}-${VERSION}${QUALITY}-desktop-armhf-raspberry-pi.img"
-BASEDIR=${HOME}/PiFlavourMaker/${RELEASE}
+TARBALL="${FLAVOUR}-${VERSION}${QUALITY}-desktop-${ARCHITECTURE}+${SUB_ARCH}-${FS_TYPE}.tar.xz"
+IMAGE="${FLAVOUR}-${VERSION}${QUALITY}-desktop-${ARCHITECTURE}+${SUB_ARCH}-${FS_TYPE}.img"
+BASEDIR=${HOME}/PiFlavourMaker/${RELEASE}/${ARCHITECTURE}
 BUILDDIR=${BASEDIR}/${FLAVOUR}
 BASE_R=${BASEDIR}/base
 DESKTOP_R=${BUILDDIR}/desktop
 DEVICE_R=${BUILDDIR}/pi
-ARCH=$(uname -m)
 export TZ=UTC
 
 # Override OEM_CONFIG here if required. Either 0 or 1.
-# - 0 to hardcode a user.
-# - 1 to use oem-config.
+# - 0 ardcode a user. username and password will $FLAVOUR/$FLAVOUR
+# - 1 use oem-config. username and password for OEM session are oem/oem
 OEM_CONFIG=1
 
 if [ ${OEM_CONFIG} -eq 1 ]; then
     USERNAME="oem"
+else
+    USERNAME="${FLAVOUR}"
 fi
