@@ -22,9 +22,15 @@
 FLAVOUR="ubuntu"
 FLAVOUR_NAME="Ubuntu"
 RELEASE="bionic"
-VERSION="18.04.2"
+MAJ_VER="18"
+MIN_VER="04"
+PNT_VER="2"
+REL_VER="${MAJ_VER}.${MIN_VER}"
+VERSION="${REL_VER}.${PNT_VER}"
 QUALITY="-alpha"
 ARCHITECTURE="armhf"
+ENABLE_VC4=1
+META_PACKAGES="ubuntu-desktop"
 
 # Either 'ext4' or 'f2fs'
 FS_TYPE="ext4"
@@ -47,7 +53,7 @@ fi
 # - 1 make a generic rootfs tarball
 MAKE_TARBALL=0
 
-TARBALL="${FLAVOUR}-${VERSION}${QUALITY}-desktop-${ARCHITECTURE}+${SUB_ARCH}-${FS_TYPE}.tar.xz"
+TARBALL="${FLAVOUR}-${VERSION}${QUALITY}-desktop-${ARCHITECTURE}+${SUB_ARCH}.tar.xz"
 IMAGE="${FLAVOUR}-${VERSION}${QUALITY}-desktop-${ARCHITECTURE}+${SUB_ARCH}-${FS_TYPE}.img"
 BASEDIR=${HOME}/PiFlavourMaker/${RELEASE}/${ARCHITECTURE}
 BUILDDIR=${BASEDIR}/${FLAVOUR}
