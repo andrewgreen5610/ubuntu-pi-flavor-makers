@@ -101,6 +101,9 @@ function ubuntu_standard() {
     nspawn apt-get -y install ubuntu-minimal
     nspawn apt-get -y install ubuntu-standard
     nspawn apt-get -y install software-properties-common
+    if [ "${FS_TYPE}" == "f2fs" ]; then
+        nspawn apt-get -y install f2fs-tools
+    fi
 }
 
 # Install meta packages
@@ -263,8 +266,6 @@ function disable_services() {
 }
 
 function configure_hardware() {
-    local FS="${1}"
-
     # Install the RPi PPA
     nspawn apt-add-repository --yes --no-update ppa:ubuntu-pi-flavour-makers/ppa
     nspawn apt-get -y update
@@ -313,7 +314,7 @@ function configure_hardware() {
 
     # Set up fstab
     cat <<EOM >$R/etc/fstab
-LABEL=writable     /               ${FS}  defaults,noatime  0  0
+LABEL=writable     /               ${FS_TYPE}  defaults,noatime  0  0
 LABEL=system-boot  /boot/firmware  vfat   defaults          0  1
 /swapfile          none            swap   sw                0  0
 EOM
@@ -483,15 +484,15 @@ function make_raspi2_image() {
     echo "/:              offset ${ROOT_OFFSET}, length ${ROOT_LENGTH}"
 
     mkfs.vfat -n system-boot -S 512 -s 16 -v "${BOOT_LOOP}"
-    if [ "${FS}" == "ext4" ]; then
+    if [ "${FS_TYPE}" == "ext4" ]; then
         mkfs.ext4 -L writable -m 0 "${ROOT_LOOP}"
-    else
+    elif [ "${FS_TYPE}" == "f2fs" ]; then
         mkfs.f2fs -l writable -o 1 "${ROOT_LOOP}"
     fi
 
     MOUNTDIR="${BUILDDIR}/mount"
     mkdir -p "${MOUNTDIR}"
-    mount -v "${ROOT_LOOP}" "${MOUNTDIR}" -t "${FS}"
+    mount -v "${ROOT_LOOP}" "${MOUNTDIR}" -t "${FS_TYPE}"
     mkdir -p "${MOUNTDIR}/boot/firmware"
     mount -v "${BOOT_LOOP}" "${MOUNTDIR}/boot/firmware" -t vfat
     rsync -aHAXx "$R/" "${MOUNTDIR}/"
@@ -589,12 +590,12 @@ function stage_03_raspi2() {
     sync_to ${DEVICE_R}
 
     R=${DEVICE_R}
-    configure_hardware ${FS_TYPE}
+    configure_hardware
     install_software
     apt_upgrade
     apt_clean
     clean_up
-    make_raspi2_image ${FS_TYPE} ${FS_SIZE}
+    make_raspi2_image ${FS_SIZE}
 }
 
 function stage_04_corrections() {
@@ -604,7 +605,7 @@ function stage_04_corrections() {
 
     apt_clean
     clean_up
-    make_raspi2_image ${FS_TYPE} ${FS_SIZE}
+    make_raspi2_image ${FS_SIZE}
 }
 
 stage_01_base
