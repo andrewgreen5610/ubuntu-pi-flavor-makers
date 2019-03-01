@@ -124,18 +124,18 @@ function ubuntu_standard() {
 # Install meta packages
 function install_meta() {
     local META="${1}"
-    local RECOMMENDS="${2}"
-    if [ "${RECOMMENDS}" == "--no-install-recommends" ]; then
-        echo 'APT::Install-Recommends "false";' > $R/etc/apt/apt.conf.d/99noinstallrecommends
-    else
-        local RECOMMENDS=""
-    fi
 
-    nspawn apt-get -y install ${RECOMMENDS} ${META}^
+    nspawn apt-get -y install ${META}^
 
-    if [ "${RECOMMENDS}" == "--no-install-recommends" ]; then
-        rm $R/etc/apt/apt.conf.d/99noinstallrecommends
-    fi
+    cat <<EOM >$R/usr/local/bin/${META}.sh
+#!/usr/bin/env bash
+service dbus start
+apt-get -f install
+dpkg --configure -a
+service dbus stop
+EOM
+
+    nspawn_script ${META}.sh
 }
 
 function create_groups() {
@@ -523,12 +523,10 @@ function stage_02_desktop() {
         sync_to "${DESKTOP_R}"
         
         R="${DESKTOP_R}"
-        if [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
-            install_meta "${FLAVOUR}-core"
-            install_meta "${FLAVOUR}-desktop"
-        else
-            install_meta "${FLAVOUR}-desktop"
-        fi
+
+        for META_PACKAGE in ${META_PACKAGES}; do
+            install_meta "${META_PACKAGE}"
+        done
 
         create_groups
         create_user
