@@ -292,11 +292,6 @@ function configure_hardware() {
         nspawn apt-get -y install xserver-xorg-video-fbturbo
     fi
 
-    # pi-top poweroff and brightness utilities
-    cp files/pi-top-* $R/usr/bin/
-    chown root:root $R/usr/bin/pi-top-*
-    chmod +x $R/usr/bin/pi-top-*
-
     # Install the Ubuntu port of raspi-config & Raspberry Pi system tweaks
     nspawn apt-get -y install raspi-config raspberrypi-sys-mods
     # Enable / partition resize
@@ -304,6 +299,26 @@ function configure_hardware() {
 
     # Install bluetooth firmware and helpers
     nspawn apt-get -y install pi-bluetooth
+
+    # Install essential GPIO support
+    nspawn apt-get -y install \
+      python-gpiozero \
+      python3-gpiozero \
+      python-pigpio \
+      python3-pigpio \
+      python-rpi.gpio \
+      python3-rpi.gpio \
+      wiringpi
+
+    # The pigpio daemon isn't going to work on aarch64 due to mailbox issues
+    if [ "${ARCHITECTURE}" == "armhf" ]; then
+        nspawn apt-get -y install pigpio
+    fi
+
+    # pi-top poweroff and brightness utilities - requires wiringpi
+    cp files/pi-top-* $R/usr/bin/
+    chown root:root $R/usr/bin/pi-top-*
+    chmod +x $R/usr/bin/pi-top-*
 
     # Add /boot/firmware/config.txt
     cp files/config.txt $R/boot/firmware/
