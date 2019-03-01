@@ -173,12 +173,15 @@ function prepare_oem_config() {
             # Force the slideshow to use Ubuntu Budgie artwork.
             sed -i 's/oem-config-slideshow-ubuntu/oem-config-slideshow-ubuntu-budgie/' $R/usr/lib/ubiquity/plugins/ubi-usersetup.py
             sed -i 's/oem-config-slideshow-ubuntu/oem-config-slideshow-ubuntu-budgie/' $R/usr/sbin/oem-config-remove-gtk
+            sed -i 's/ubiquity-slideshow-ubuntu/ubiquity-slideshow-ubuntu-budgie/' $R/usr/sbin/oem-config-remove-gtk
         elif [ "${FLAVOUR}" == "ubuntu-mate" ]; then
             nspawn apt-get -y install --no-install-recommends oem-config-slideshow-ubuntu-mate
             # Force the slideshow to use Ubuntu MATE artwork.
             sed -i 's/oem-config-slideshow-ubuntu/oem-config-slideshow-ubuntu-mate/' $R/usr/lib/ubiquity/plugins/ubi-usersetup.py
             sed -i 's/oem-config-slideshow-ubuntu/oem-config-slideshow-ubuntu-mate/' $R/usr/sbin/oem-config-remove-gtk
+            sed -i 's/ubiquity-slideshow-ubuntu/ubiquity-slideshow-ubuntu-mate/' $R/usr/sbin/oem-config-remove-gtk
         fi
+        mkdir -p $R/var/log/installer
         cp -a $R/usr/lib/oem-config/oem-config.service $R/lib/systemd/system
         cp -a $R/usr/lib/oem-config/oem-config.target $R/lib/systemd/system
         nspawn /bin/systemctl enable oem-config.service
@@ -347,7 +350,6 @@ EOM
 }
 
 function clean_up() {
-    mkdir -p $R/var/log/installer
     cp files/stub-resolv.conf $R/run/systemd/resolve/
     rm -f $R/etc/apt/*.save
     rm -f $R/etc/apt/sources.list.d/*.save
