@@ -477,7 +477,7 @@ function make_hash() {
 function make_tarball() {
     if [ ${MAKE_TARBALL} -eq 1 ]; then
         rm -f "${BASEDIR}/${TARBALL}" || true
-        tar -cSf "${BASEDIR}/${TARBALL}" $R
+        tar -cJf "${BASEDIR}/${TARBALL}" $R
         make_hash "${BASEDIR}/${TARBALL}"
     fi
 }
