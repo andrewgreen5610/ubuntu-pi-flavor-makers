@@ -357,13 +357,16 @@ EOM
 }
 
 function clean_up() {
+    nspawn apt-get -y purge --auto-remove ureadahead
+    rm -rf $R/var/lib/ureadahead/*
+    nspawn apt-get -y autoremove
+
     cp files/stub-resolv.conf $R/run/systemd/resolve/
     rm -f $R/etc/apt/*.save
     rm -f $R/etc/apt/sources.list.d/*.save
     rm -rf $R/tmp/*
     rm -f $R/var/crash/*
     rm -f $R/var/lib/mlocate/mlocate.db
-    rm -rf $R/var/lib/ureadahead/*
 
     # Build cruft
     rm -f $R/var/cache/debconf/*-old
