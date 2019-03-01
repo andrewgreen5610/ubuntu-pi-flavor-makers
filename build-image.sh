@@ -347,35 +347,28 @@ EOM
 }
 
 function clean_up() {
-    rm -f $R/etc/apt/*.save || true
-    rm -f $R/etc/apt/sources.list.d/*.save || true
-    rm -f $R/etc/resolvconf/resolv.conf.d/original
-    rm -f $R/run/*/*pid || true
-    rm -f $R/run/*pid || true
-    rm -f $R/run/cups/cups.sock || true
-    rm -f $R/run/uuidd/request || true
-    rm -f $R/etc/*-
+    mkdir -p $R/var/log/installer
+    cp files/stub-resolv.conf $R/run/systemd/resolve/
+    rm -f $R/etc/apt/*.save
+    rm -f $R/etc/apt/sources.list.d/*.save
     rm -rf $R/tmp/*
     rm -f $R/var/crash/*
-    rm -f $R/var/lib/urandom/random-seed
+    rm -f $R/var/lib/mlocate/mlocate.db
+    rm -rf $R/var/lib/ureadahead/*
 
     # Build cruft
-    rm -f $R/var/cache/debconf/*-old || true
-    rm -f $R/var/lib/dpkg/*-old || true
-    rm -f $R/var/cache/bootstrap.log || true
-    truncate -s 0 $R/var/log/lastlog || true
-    truncate -s 0 $R/var/log/faillog || true
-    mkdir -p $R/var/log/installer
+    rm -f $R/var/cache/debconf/*-old
+    rm -f $R/var/lib/dpkg/*-old
+    truncate -s 0 $R/var/log/lastlog
+    truncate -s 0 $R/var/log/faillog
 
     # SSH host keys
     rm -f $R/etc/ssh/ssh_host_*key
     rm -f $R/etc/ssh/ssh_host_*.pub
 
-    # Potentially sensitive.
+    # Remove any potential sensitive user data
     rm -f $R/root/.bash_history
     rm -f $R/root/.ssh/known_hosts
-
-    # Remove bogus home directory
     if [ -d $R/home/${SUDO_USER} ]; then
         rm -rf $R/home/${SUDO_USER} || true
     fi
@@ -388,8 +381,8 @@ function clean_up() {
     [ -L $R/var/lib/dbus/machine-id ] || rm -f $R/var/lib/dbus/machine-id
     echo '' > $R/etc/machine-id
 
-    # Build system state tracking files
-    rm -rf $R/tmp/.stage_* || true
+    # flash-kernel backups
+    rm -f $R/boot/firmware/*.bak
 }
 
 function make_raspi2_image() {
