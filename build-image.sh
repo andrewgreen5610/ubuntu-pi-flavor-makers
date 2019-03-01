@@ -31,7 +31,7 @@ fi
 
 function nspawn() {
     # Create basic resolv.conf for bind mounting inside the container
-    echo "nameserver 1.1.1.1" > $BASEDIR/resolv.conf
+    echo "nameserver 1.1.1.1" > ${BASEDIR}/resolv.conf
     mkdir -p $R/boot/firmware 2>/dev/null
 
     # Make sure the container has a machine-id
@@ -40,7 +40,7 @@ function nspawn() {
     # Bind mount resolv.conf and the firmware, set the hostname and spawn
     systemd-nspawn \
       --resolv-conf=off \
-      --bind-ro=$BASEDIR/resolv.conf:/etc/resolv.conf \
+      --bind-ro=${BASEDIR}/resolv.conf:/etc/resolv.conf \
       --bind=$R/boot/firmware:/boot/firmware \
       --hostname=${FLAVOUR} \
       -D $R "$@"
@@ -62,7 +62,7 @@ function bootstrap() {
     whois xz-utils
 
     # Use the same base system for all flavours.
-    qemu-debootstrap --verbose --arch=$ARCHITECTURE $RELEASE $R http://ports.ubuntu.com/
+    qemu-debootstrap --verbose --arch=${ARCHITECTURE} ${RELEASE} $R http://ports.ubuntu.com/
 }
 
 function generate_locale() {
@@ -108,9 +108,10 @@ function apt_clean() {
 
 # Install Ubuntu standard
 function ubuntu_standard() {
-    nspawn apt-get -y install ubuntu-minimal
-    nspawn apt-get -y install ubuntu-standard
-    nspawn apt-get -y install software-properties-common
+    nspawn apt-get -y install \
+      ubuntu-minimal \
+      ubuntu-standard \
+      software-properties-common
 }
 
 # Install meta packages
@@ -272,6 +273,8 @@ function disable_services() {
     # Disable ureadahead, of no benefit for the Pi.
     if [ -e $R/sbin/ureadahead ]; then
         nspawn /bin/systemctl disable ureadahead
+        nspawn apt-get -y purge --auto-remove ureadahead
+        rm -rf $R/var/lib/ureadahead/*
     fi
 
     # Disable mlocate
@@ -309,7 +312,7 @@ function configure_hardware() {
     # Install the Ubuntu port of raspi-config & Raspberry Pi system tweaks
     nspawn apt-get -y install raspi-config raspberrypi-sys-mods
     # Enable / partition resize
-    #nspawn systemctl enable resize-fs.service
+    nspawn systemctl enable resize-fs.service
 
     # Install bluetooth firmware and helpers
     nspawn apt-get -y install pi-bluetooth
@@ -354,12 +357,11 @@ EOM
     #nspawn flash-kernel --machine "Raspberry Pi 3 Model B"
     #nspawn mkknlimg --dtok /usr/lib/u-boot/rpi_2/u-boot.bin /boot/firmware/uboot.bin
     #nspawn mkknlimg --dtok /usr/lib/u-boot/rpi_3_32b/u-boot.bin /boot/firmware/uboot.bin
-    #rm -f $R/boot/firmware/*.bak
 }
 
 function clean_up() {
-    nspawn apt-get -y purge --auto-remove ureadahead
-    rm -rf $R/var/lib/ureadahead/*
+    rm $R/etc/initramfs-tools/conf.d/splash
+    nspawn update-initramfs -u
     nspawn apt-get -y autoremove
 
     cp files/stub-resolv.conf $R/run/systemd/resolve/
@@ -511,13 +513,7 @@ function stage_02_desktop() {
         sync_to "${DESKTOP_R}"
         
         R="${DESKTOP_R}"
-        if [ "${FLAVOUR}" == "ubuntu-mate" ]; then
-            # Install the RPi PPA to get the latest meta package for ubuntu-mate
-            nspawn apt-add-repository --yes --no-update ppa:ubuntu-pi-flavour-makers/ppa
-            nspawn apt-get -y update
-            install_meta ${FLAVOUR}-core
-            install_meta ${FLAVOUR}-desktop
-        elif [ "${FLAVOUR}" == "xubuntu" ]; then
+        if [ "${FLAVOUR}" == "ubuntu-mate" ] || [ "${FLAVOUR}" == "xubuntu" ]; then
             install_meta ${FLAVOUR}-core
             install_meta ${FLAVOUR}-desktop
         else
@@ -539,7 +535,7 @@ function stage_02_desktop() {
     fi
 }
 
-function stage_03_raspi2() {
+function stage_03_raspi()
     # Always start with a clean rootfs
     R="${DESKTOP_R}"
     sync_to ${DEVICE_R}
@@ -564,6 +560,6 @@ function stage_04_corrections() {
 
 stage_01_base
 stage_02_desktop
-stage_03_raspi2
+stage_03_raspi
 #stage_04_corrections
 #compress_image
