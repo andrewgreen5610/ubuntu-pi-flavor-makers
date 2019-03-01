@@ -353,6 +353,7 @@ EOM
     #nspawn flash-kernel --machine "Raspberry Pi 2 Model B"
     #nspawn flash-kernel --machine "Raspberry Pi 3 Model B"
     #nspawn mkknlimg --dtok /usr/lib/u-boot/rpi_2/u-boot.bin /boot/firmware/uboot.bin
+    #nspawn mkknlimg --dtok /usr/lib/u-boot/rpi_3_32b/u-boot.bin /boot/firmware/uboot.bin
     #rm -f $R/boot/firmware/*.bak
 }
 
