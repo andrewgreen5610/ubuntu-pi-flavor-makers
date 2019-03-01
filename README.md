@@ -12,7 +12,7 @@ applications is the same as that for the regular desktop version, ie using
 We have done what we can to optimise the build for the Raspberry Pi
 and one can comfortably use applications such as LibreOffice, which in
 fact is a joy to use :-) But the microSDHC I/O throughput is a
-bottleneck so **we recommend that you use a Class 6 or Class 10 microSDHC**
+bottleneck so **[we recommend that you use a good quality Class 10 microSDHC](https://www.pidramble.com/wiki/benchmarks/microsd-cards)**
 card.
 
 You'll need a microSD card which is 4GB or greater to fit the image.
