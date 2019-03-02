@@ -366,8 +366,6 @@ EOM
 }
 
 function clean_up() {
-    rm $R/etc/initramfs-tools/conf.d/splash
-    nspawn update-initramfs -u
     nspawn apt-get -y autoremove
 
     cp files/stub-resolv.conf $R/run/systemd/resolve/
