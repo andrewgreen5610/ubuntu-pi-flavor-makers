@@ -496,7 +496,7 @@ function compress_image() {
 }
 
 function stage_01_base() {
-    if [ ! -f "${BASE_R}/tmp/.stage_base" ]; then
+    if [ ! -f "${BASE_R}/tmp/stage_base" ]; then
         R="${BASE_R}"
         bootstrap
         generate_locale
@@ -504,13 +504,13 @@ function stage_01_base() {
         apt_upgrade
         ubuntu_standard
         apt_clean
-        touch "$R/tmp/.stage_base"
+        touch "$R/tmp/stage_base"
         sync_to "${DESKTOP_R}"
     fi
 }
 
 function stage_02_desktop() {
-    if [ ! -f "${DESKTOP_R}/tmp/.stage_desktop" ]; then
+    if [ ! -f "${DESKTOP_R}/tmp/stage_desktop" ]; then
         R="${BASE_R}"
         sync_to "${DESKTOP_R}"
         
@@ -531,7 +531,7 @@ function stage_02_desktop() {
         clean_up
         sync_to "${DEVICE_R}"
         make_tarball
-        touch "${DESKTOP_R}/tmp/.stage_desktop"
+        touch "${DESKTOP_R}/tmp/stage_desktop"
     fi
 }
 
