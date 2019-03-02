@@ -483,17 +483,15 @@ function make_tarball() {
     local THREADS=$(cat /proc/cpuinfo | grep "^processor" | wc -l)
     if [ ${MAKE_TARBALL} -eq 1 ]; then
         rm -f "${BASEDIR}/${TARBALL}"
-        tar -I "pxz -T ${THREADS}" -cf "${BASEDIR}/${TARBALL}" $R
+        tar -cJf "${BASEDIR}/${TARBALL}" "${DESKTOP_R}"
         make_hash "${BASEDIR}/${TARBALL}"
     fi
 }
 
 function compress_image() {
-    local THREADS=$(cat /proc/cpuinfo | grep "^processor" | wc -l)
-    if [ ! -e "${BASEDIR}/${IMAGE}.xz" ]; then
-        echo "Compressing to: ${BASEDIR}/${IMAGE}.xz"
-        pxz -T ${THREADS} ${BASEDIR}/${IMAGE}
-    fi
+    echo "Compressing to: ${BASEDIR}/${IMAGE}.xz"
+    rm "${BASEDIR}/${IMAGE}.xz"
+    xz "${BASEDIR}/${IMAGE}"
     make_hash "${BASEDIR}/${IMAGE}.xz"
 }
 
