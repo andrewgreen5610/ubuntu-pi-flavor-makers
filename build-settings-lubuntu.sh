@@ -63,12 +63,6 @@ DEVICE_R=${BUILDDIR}/pi
 export TZ=UTC
 
 # Override OEM_CONFIG here if required. Either 0 or 1.
-# - 0 ardcode a user. username and password will $FLAVOUR/$FLAVOUR
-# - 1 use oem-config. username and password for OEM session are oem/oem
+# - 0 hardcode a user. username and password will $FLAVOUR/$FLAVOUR
+# - 1 use oem-config. username and password for OEM the session are oem/oem
 OEM_CONFIG=1
-
-if [ ${OEM_CONFIG} -eq 1 ]; then
-    USERNAME="oem"
-else
-    USERNAME="${FLAVOUR}"
-fi
