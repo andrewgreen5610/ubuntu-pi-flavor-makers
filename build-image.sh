@@ -368,17 +368,11 @@ EOM
     cp "${VMLINUZ}" $R/boot/firmware/vmlinuz
     INITRD="$(ls -1 $R/boot/initrd.img-* | sort | tail -n 1)"
     cp "${INITRD}" $R/boot/firmware/initrd.img
-
-    #nspawn flash-kernel --machine "Raspberry Pi 2 Model B"
-    #nspawn flash-kernel --machine "Raspberry Pi 3 Model B"
-    #nspawn mkknlimg --dtok /usr/lib/u-boot/rpi_2/u-boot.bin /boot/firmware/uboot.bin
-    #nspawn mkknlimg --dtok /usr/lib/u-boot/rpi_3_32b/u-boot.bin /boot/firmware/uboot.bin
 }
 
 function clean_up() {
     nspawn apt-get -y autoremove
-    cp files/xorg.conf.failsafe $R/etc/X11/
-    cp files/stub-resolv.conf $R/run/systemd/resolve/
+
     rm -f $R/etc/apt/*.save
     rm -f $R/etc/apt/sources.list.d/*.save
     rm -rf $R/tmp/*
@@ -406,9 +400,6 @@ function clean_up() {
     rm -f $R/etc/NetworkManager/system-connections/*
     [ -L $R/var/lib/dbus/machine-id ] || rm -f $R/var/lib/dbus/machine-id
     echo '' > $R/etc/machine-id
-
-    # flash-kernel backups
-    rm -f $R/boot/firmware/*.bak
 }
 
 # ext4 remains the default - https://forum.armbian.com/topic/4167-f2fs-revisited/
