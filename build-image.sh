@@ -59,7 +59,7 @@ function sync_to() {
     if [ ! -d "${TARGET}" ]; then
         mkdir -p "${TARGET}"
     fi
-    rsync -aHAXx --progress --delete ${R}/ ${TARGET}/
+    rsync -aHAXx --delete ${R}/ ${TARGET}/
 }
 
 # Base debootstrap
