@@ -149,15 +149,19 @@ function create_groups() {
 # Create default user
 function create_user() {
     local DATE=$(date +%m%H%M%S)
-    local PASSWD=$(mkpasswd -m sha-512 ${USERNAME} ${DATE})
-
     if [ ${OEM_CONFIG} -eq 1 ]; then
-        nspawn addgroup --gid 29999 oem
-        nspawn adduser --gecos "OEM Configuration (temporary user)" --add_extra_groups --disabled-password --gid 29999 --uid 29999 ${USERNAME}
+        local NEWUSER="oem"
+        local PASSWD=$(mkpasswd -m sha-512 ${NEWUSER} ${DATE})
+        nspawn addgroup --gid 29999 ${NEWUSER}
+        nspawn adduser --gecos "OEM Configuration (temporary user)" --add_extra_groups --disabled-password --gid 29999 --uid 29999 ${NEW_USER}
     else
-        nspawn adduser --gecos "${FLAVOUR_NAME}" --add_extra_groups --disabled-password ${USERNAME}
+        local NEWUSER="${FLAVOUR}"
+        local PASSWD=$(mkpasswd -m sha-512 ${NEWUSER} ${DATE})
+        nspawn adduser --gecos "${FLAVOUR_NAME}" --add_extra_groups --disabled-password ${NEWUSER}
     fi
-    nspawn usermod -a -G sudo -p ${PASSWD} ${USERNAME}
+
+    # Add the newly created user to sudoers
+    nspawn usermod -a -G sudo -p ${PASSWD} ${NEWUSER}
 }
 
 # Prepare oem-config for first boot.
