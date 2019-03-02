@@ -345,6 +345,10 @@ function configure_hardware() {
         nspawn apt-get -y install xserver-xorg-video-fbturbo
     fi
 
+    # Create symlinks for config.txt and cmdline.txt in familiar places.
+    nspawn ln -s /boot/firmware/config.txt /boot/
+    nspawn ln -s /boot/firmware/cmdline.txt /boot/
+
     # Create swapfile
     fallocate -l 128M $R/swapfile
     chmod 600 $R/swapfile
