@@ -409,7 +409,7 @@ function make_raspi_image() {
     fi
 
     # Build the image file
-    local SIZE_IMG="${1}"
+    local SIZE_IMG="${FS_SIZE}"
     local SIZE_BOOT="200MiB"
 
     # Remove old images.
@@ -545,7 +545,7 @@ function stage_03_raspi() {
     apt_upgrade
     apt_clean
     clean_up
-    make_raspi_image "${FS_SIZE}"
+    make_raspi_image
 }
 
 function stage_04_corrections() {
@@ -555,7 +555,7 @@ function stage_04_corrections() {
 
     apt_clean
     clean_up
-    make_raspi_image "${FS_SIZE}"
+    make_raspi_image
 }
 
 stage_01_base
