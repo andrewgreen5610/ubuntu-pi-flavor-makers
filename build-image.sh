@@ -559,6 +559,15 @@ function stage_04_corrections() {
     make_raspi_image
 }
 
+function stage_05_images() {
+    R="${DEVICE_R}"
+
+    make_tarball
+    create_user
+    make_raspi_image
+    compress_image
+}
+
 stage_01_base
 stage_02_desktop
 stage_03_raspi
