@@ -388,9 +388,7 @@ function clean_up() {
     # Remove any potential sensitive user data
     rm -f $R/root/.bash_history
     rm -f $R/root/.ssh/known_hosts
-    if [ -d $R/home/${SUDO_USER} ]; then
-        rm -rf $R/home/${SUDO_USER} || true
-    fi
+    rm -rf $R/home/*
 
     # Machine-specific, so remove in case this system is going to be
     # cloned.  These will be regenerated on the first boot.
@@ -542,7 +540,7 @@ function stage_03_raspi() {
     R="${DESKTOP_R}"
     sync_to "${DEVICE_R}"
 
-    R=${DEVICE_R}
+    R="${DEVICE_R}"
     configure_hardware
     apt_upgrade
     apt_clean
@@ -551,7 +549,7 @@ function stage_03_raspi() {
 }
 
 function stage_04_corrections() {
-    R=${DEVICE_R}
+    R="${DEVICE_R}"
 
     # Insert other corrections here.
 
