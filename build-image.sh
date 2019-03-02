@@ -282,6 +282,13 @@ function disable_services() {
     fi
 }
 
+function inject_font_cache() {
+    if [ -e files/fontconfig/${ARCHITECTURE}/CACHEDIR.TAG ]; then
+        rm -f $R/var/cache/fontconfig/*
+        rsync -av --delete files/fontconfig/${ARCHITECTURE}/ $R/var/cache/fontconfig/
+    fi
+}
+
 function configure_hardware() {
     # Install the RPi PPA
     nspawn apt-add-repository --yes --no-update ppa:ubuntu-pi-flavour-makers/ppa
@@ -533,6 +540,7 @@ function stage_02_desktop() {
         disable_services
         apt_upgrade
         apt_clean
+        inject_font_cache
         clean_up
         sync_to "${DEVICE_R}"
         make_tarball
