@@ -327,11 +327,6 @@ function configure_hardware() {
         nspawn apt-get -y install pigpio
     fi
 
-    # pi-top poweroff and brightness utilities - requires wiringpi
-    cp files/pi-top-* $R/usr/bin/
-    chown root:root $R/usr/bin/pi-top-*
-    chmod +x $R/usr/bin/pi-top-*
-
     # Add /boot/firmware/config.txt
     cp files/config.txt $R/boot/firmware/
     sed -i 's/#kernel=""/kernel=vmlinuz/' $R/boot/firmware/config.txt
