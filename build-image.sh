@@ -388,7 +388,6 @@ function clean_up() {
     # Remove any potential sensitive user data
     rm -f $R/root/.bash_history
     rm -f $R/root/.ssh/known_hosts
-    rm -rf $R/home/*
 
     # Machine-specific, so remove in case this system is going to be
     # cloned.  These will be regenerated on the first boot.
