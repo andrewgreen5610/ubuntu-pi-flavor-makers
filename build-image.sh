@@ -336,7 +336,7 @@ function configure_hardware() {
     if [ ${ENABLE_VC4} -eq 1 ]; then
         echo "dtoverlay=vc4-kms-v3d" >> $R/boot/firmware/config.txt
     else
-        nspawn apt-get -y install xserver-xorg-video-fbturbo    
+        nspawn apt-get -y install xserver-xorg-video-fbturbo
     fi
 
     # Create swapfile
@@ -466,7 +466,7 @@ function make_hash() {
     local FILE="${1}"
     local HASH="sha256"
     local KEY="FFEE1E5C"
-    
+
     rm -f ${FILE}.${HASH}
     rm -f ${FILE}.${HASH}.sign
 
@@ -515,7 +515,7 @@ function stage_02_desktop() {
     if [ ! -f "${DESKTOP_R}/tmp/stage_desktop" ]; then
         R="${BASE_R}"
         sync_to "${DESKTOP_R}"
-        
+
         R="${DESKTOP_R}"
 
         for META_PACKAGE in ${META_PACKAGES}; do
