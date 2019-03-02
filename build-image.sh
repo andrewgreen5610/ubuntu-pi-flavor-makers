@@ -153,7 +153,7 @@ function create_user() {
         local NEWUSER="oem"
         local PASSWD=$(mkpasswd -m sha-512 ${NEWUSER} ${DATE})
         nspawn addgroup --gid 29999 ${NEWUSER}
-        nspawn adduser --gecos "OEM Configuration (temporary user)" --add_extra_groups --disabled-password --gid 29999 --uid 29999 ${NEW_USER}
+        nspawn adduser --gecos "OEM Configuration (temporary user)" --add_extra_groups --disabled-password --gid 29999 --uid 29999 ${NEWUSER}
     else
         local NEWUSER="${FLAVOUR}"
         local PASSWD=$(mkpasswd -m sha-512 ${NEWUSER} ${DATE})
