@@ -367,7 +367,7 @@ EOM
 
 function clean_up() {
     nspawn apt-get -y autoremove
-
+    cp files/xorg.conf.failsafe $R/etc/X11/
     cp files/stub-resolv.conf $R/run/systemd/resolve/
     rm -f $R/etc/apt/*.save
     rm -f $R/etc/apt/sources.list.d/*.save
