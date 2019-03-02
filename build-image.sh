@@ -46,6 +46,14 @@ function nspawn() {
       -D $R "$@"
 }
 
+function nspawn_script() {
+    local SCRIPT="${1}"
+
+    chmod +x $R/usr/local/bin/${SCRIPT}
+    nspawn /usr/local/bin/${SCRIPT}
+    rm -f $R/usr/local/bin/${SCRIPT}
+}
+
 function sync_to() {
     local TARGET="${1}"
     if [ ! -d "${TARGET}" ]; then
@@ -63,14 +71,6 @@ function bootstrap() {
 
     # Use the same base system for all flavours.
     qemu-debootstrap --verbose --arch=${ARCHITECTURE} ${RELEASE} $R http://ports.ubuntu.com/
-}
-
-function nspawn_script() {
-    local SCRIPT="${1}"
-
-    chmod +x $R/usr/local/bin/${SCRIPT}
-    nspawn /usr/local/bin/${SCRIPT}
-    rm -f $R/usr/local/bin/${SCRIPT}
 }
 
 function generate_locale() {
