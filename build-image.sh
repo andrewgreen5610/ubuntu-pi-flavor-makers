@@ -567,7 +567,6 @@ function stage_05_images() {
     R="${DEVICE_R}"
 
     make_tarball
-    create_user
     make_raspi_image
     compress_image
 }
