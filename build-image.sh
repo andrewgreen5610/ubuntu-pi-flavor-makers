@@ -346,6 +346,12 @@ function configure_hardware() {
         nspawn apt-get -y install xserver-xorg-video-fbturbo
     fi
 
+    # Install miscellaneous Raspberry Pi utilities EGL/GLES/OpenVG libraries for VideoCore IV
+    # Currently only available for armhf
+    if [ "${ARCHITECTURE}" == "armhf" ]; then
+        nspawn apt-get - y install libraspberrypi-bin libraspberrypi0
+    fi
+
     # Create symlinks for config.txt and cmdline.txt in familiar places.
     nspawn ln -s /boot/firmware/config.txt /boot/
     nspawn ln -s /boot/firmware/cmdline.txt /boot/
