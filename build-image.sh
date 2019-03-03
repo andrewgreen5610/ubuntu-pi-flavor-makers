@@ -534,7 +534,6 @@ function stage_02_desktop() {
         apt_clean
         inject_font_cache
         clean_up
-        sync_to "${DEVICE_R}"
         make_tarball
         touch "${DESKTOP_R}/tmp/stage_desktop"
     fi
