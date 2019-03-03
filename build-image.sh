@@ -337,7 +337,7 @@ function configure_hardware() {
     fi
 
     # Add /boot/firmware/cmdline.txt
-    echo "net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=${FS_TYPE} elevator=deadline fsck.repair=yes rootwait plymouth.ignore-serial-consoles" > $R/boot/firmware/cmdline.txt
+    echo "net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=LABEL=writable rootfstype=${FS_TYPE} elevator=deadline fsck.repair=yes rootwait plymouth.ignore-serial-consoles" > $R/boot/firmware/cmdline.txt
 
     # Enable experimental VC4 (if spedicifed) or install fbturbo drivers
     if [ ${ENABLE_VC4} -eq 1 ]; then
