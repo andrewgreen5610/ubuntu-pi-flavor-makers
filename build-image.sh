@@ -331,6 +331,7 @@ function configure_hardware() {
     cp files/config.txt $R/boot/firmware/
     sed -i 's/#kernel=""/kernel=vmlinuz/' $R/boot/firmware/config.txt
     sed -i 's/#initramfs initramf.gz 0x00800000/initramfs initrd.img followkernel/' $R/boot/firmware/config.txt
+    sed -i 's/#hdmi_drive=2/hdmi_drive=2/' $R/boot/firmware/config.txt
     if [ "${ARCHITECTURE}" == "arm64" ]; then
         echo "arm_control=0x200" >> $R/boot/firmware/config.txt
     fi
