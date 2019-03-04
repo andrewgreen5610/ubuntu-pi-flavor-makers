@@ -32,18 +32,18 @@ fi
 function nspawn() {
     # Create basic resolv.conf for bind mounting inside the container
     echo "nameserver 1.1.1.1" > ${BASEDIR}/resolv.conf
-    mkdir -p $R/boot/firmware 2>/dev/null
+    mkdir -p ${R}/boot/firmware 2>/dev/null
 
     # Make sure the container has a machine-id
-    systemd-machine-id-setup --root $R --print
+    systemd-machine-id-setup --root ${R} --print
 
     # Bind mount resolv.conf and the firmware, set the hostname and spawn
     systemd-nspawn \
       --resolv-conf=off \
       --bind-ro=${BASEDIR}/resolv.conf:/etc/resolv.conf \
-      --bind=$R/boot/firmware:/boot/firmware \
+      --bind=${R}/boot/firmware:/boot/firmware \
       --hostname=${FLAVOUR} \
-      -D $R "$@"
+      -D "${R}" "$@"
 }
 
 function nspawn_script() {
