@@ -340,11 +340,21 @@ function seed_snaps() {
     fi
 }
 
-function inject_font_cache() {
-    if [ -e files/fontconfig/${ARCHITECTURE}/CACHEDIR.TAG ]; then
-        rm -f $R/var/cache/fontconfig/*
-        rsync -av --delete files/fontconfig/${ARCHITECTURE}/ $R/var/cache/fontconfig/
-    fi
+function rebuild_font_cache() {
+    # Strip nanosec from font directories and files, then rebuild the font
+    # cache. Font caches built inside the container do not have nanosecond
+    # precision but when those files are accessed outside the container, they
+    # do have nanosecond precision. This results in the font cache being
+    # rebuilt on first boot. Forcing all font dirs and files to 0 nanosec mtime
+    # prevents this significant boot delay.
+    #  - https://pad.lv/1749546
+    rm -f ${R}/var/cache/fontcache/*
+    STAMP=$(date +"%Y-%m-%d %H:%M:%S.0 +0000")
+    for FONT_DIR in ${R}/usr/share/fonts ${R}/usr/share/fonts-droid-fallback ${R}/usr/share/fonts-sil-padauk ${R}/usr/local/share/fonts; do
+        find "${FONT_DIR}" -type d -exec touch -a -m --date "${STAMP}" {} \;
+        find "${FONT_DIR}" -type f -exec touch -a -m --date "${STAMP}" {} \;
+    done
+    nspawn env FC_DEBUG=16 fc-cache -frs
 }
 
 function configure_hardware() {
@@ -591,7 +601,7 @@ function stage_02_desktop() {
         disable_services
         apt_upgrade
         apt_clean
-        inject_font_cache
+        rebuild_font_cache
         clean_up
         make_tarball
         touch "${DESKTOP_R}/tmp/stage_desktop"
