@@ -444,8 +444,10 @@ function clean_up() {
     # Build cruft
     rm -f $R/var/cache/debconf/*-old
     rm -f $R/var/lib/dpkg/*-old
-    truncate -s 0 $R/var/log/lastlog
     truncate -s 0 $R/var/log/faillog
+    truncate -s 0 $R/var/log/installer/debug
+    truncate -s 0 $R/var/log/lastlog
+    truncate -s 0 $R/var/log/syslog
 
     # SSH host keys
     rm -f $R/etc/ssh/ssh_host_*key
@@ -542,7 +544,6 @@ function make_hash() {
 }
 
 function make_tarball() {
-    local THREADS=$(cat /proc/cpuinfo | grep "^processor" | wc -l)
     if [ ${MAKE_TARBALL} -eq 1 ]; then
         rm -f "${BASEDIR}/${TARBALL}"
         tar -cJf "${BASEDIR}/${TARBALL}" "${DESKTOP_R}"
