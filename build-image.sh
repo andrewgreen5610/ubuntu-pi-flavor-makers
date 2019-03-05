@@ -564,7 +564,7 @@ function make_tarball() {
 function compress_image() {
     echo "Compressing to: ${BASEDIR}/${IMAGE}.xz"
     rm "${BASEDIR}/${IMAGE}.xz"
-    xz "${BASEDIR}/${IMAGE}"
+    xz -T 0 "${BASEDIR}/${IMAGE}"
     make_hash "${BASEDIR}/${IMAGE}.xz"
 }
 
