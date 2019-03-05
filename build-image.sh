@@ -443,6 +443,7 @@ EOM
 }
 
 function clean_up() {
+    nspawn apt-get -y purge compton
     nspawn apt-get -y autoremove
 
     rm -f $R/etc/apt/*.save
