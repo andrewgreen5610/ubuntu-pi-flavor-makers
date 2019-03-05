@@ -66,7 +66,7 @@ function sync_to() {
 function bootstrap() {
     # Required tools
     apt-get -y install binfmt-support debootstrap f2fs-tools \
-    pxz qemu-user-static rsync systemd-container ubuntu-keyring \
+    qemu-user-static rsync systemd-container ubuntu-keyring \
     whois xz-utils
 
     # Use the same base system for all flavours.
