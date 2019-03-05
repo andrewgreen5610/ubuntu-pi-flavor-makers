@@ -264,6 +264,24 @@ function disable_services() {
         nspawn /bin/systemctl disable apt-daily-upgrade.service
     fi
 
+    # Unattended upgrades
+    if [ -e $R/etc/init.d/unattended-upgrades ]; then
+        nspawn /bin/systemctl disable unattended-upgrades
+    fi
+
+    # lm-sensors - provides no metrics for the Pi
+    if [ -e $R/etc/init.d/lm-sensors ]; then
+        nspawn /bin/systemctl disable lm-sensors
+    fi
+
+    # hddtemp - provides no readings for the Pi
+    if [ -e $R/etc/init.d/hddtemp ]; then
+        nspawn /bin/systemctl disable hddtemp
+    fi
+
+    # There is no grub on the Pi
+    nspawn /bin/systemctl disable grub-common
+
     # Disable fstrim, there are no SSDs here.
     if [ -e $R/lib/systemd/system/fstrim.timer ]; then
         nspawn /bin/systemctl disable fstrim.timer
