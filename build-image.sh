@@ -433,7 +433,12 @@ function configure_hardware() {
     fi
 
     # Install miscellaneous Raspberry Pi utilities EGL/GLES/OpenVG libraries for VideoCore IV
-    nspawn apt-get -y install libraspberrypi-bin libraspberrypi-bin-nonfree libraspberrypi0
+    nspawn apt-get -y install libraspberrypi-bin libraspberrypi0
+
+    # These non-free binaries are only available for armhf
+    if [ "${ARCHITECTURE}" == "armhf" ]; then
+        nspawn apt-get -y install libraspberrypi-bin-nonfree
+    fi
 
     # Create symlinks for config.txt and cmdline.txt in familiar places.
     nspawn ln -s /boot/firmware/config.txt /boot/
