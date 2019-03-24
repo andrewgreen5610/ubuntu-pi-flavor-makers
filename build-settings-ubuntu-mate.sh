@@ -27,11 +27,11 @@ MIN_VER="04"
 PNT_VER="2"
 REL_VER="${MAJ_VER}.${MIN_VER}"
 VERSION="${REL_VER}.${PNT_VER}"
-QUALITY="-alpha2"
+QUALITY="-beta1"
 ARCHITECTURE="armhf"
 ENABLE_VC4=0
 META_PACKAGES="ubuntu-mate-core ubuntu-mate-desktop"
-STRICT_SNAPS="core pulsemixer"
+STRICT_SNAPS="core pulsemixer ubuntu-mate-pi"
 CLASSIC_SNAPS="ubuntu-mate-welcome software-boutique"
 
 # Either 'ext4' or 'f2fs'
