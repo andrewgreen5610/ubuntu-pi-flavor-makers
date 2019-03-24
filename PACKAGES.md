@@ -45,12 +45,12 @@ Sadly COFI fails to build in a PPA :-(
 
 #### In crazy-pi
 
-  * picamera - http://archive.raspberrypi.org/debian/pool/main/p/picamera/
   * rtimulib - http://archive.raspberrypi.org/debian/pool/main/r/rtimulib/
-  * astropi - http://archive.raspberrypi.org/debian/pool/main/a/astropi/
 
 ### Not yet in my Bionic PPA
 
+  * astropi - http://archive.raspberrypi.org/debian/pool/main/a/astropi/
+  * picamera - http://archive.raspberrypi.org/debian/pool/main/p/picamera/
   * http://archive.raspberrypi.org/debian/pool/main/r/raspi-gpio/
   * http://archive.raspberrypi.org/debian/pool/main/s/spidev/
   * http://archive.raspberrypi.org/debian/pool/main/c/codebug-i2c-tether/   (Hardcode target Python 3.x in debian/rules)
