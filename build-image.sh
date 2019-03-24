@@ -375,6 +375,12 @@ function rebuild_font_cache() {
     nspawn env FC_DEBUG=16 fc-cache -frs
 }
 
+function install_chromium() {
+    nspawn apt-get -y purge firefox* xul-ext-ubufox
+    nspawn apt-get -y install chromium-browser
+    nspawn sed -i 's/firefox/chromium-browser/g' /usr/share/mate-panel/layout/*
+}
+
 function configure_hardware() {
     # Install the RPi PPA
     nspawn apt-add-repository --yes --no-update ppa:ubuntu-pi-flavour-makers/ppa
