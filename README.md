@@ -1,7 +1,7 @@
 # Ubuntu MATE 16.04 for the Raspberry Pi 2 and Raspberry Pi 3.
 
 Martin Wimpress and Rohith Madhavan have made an Ubuntu MATE image
-for the Raspberry Pi 2 and Raspberry PI 3 which you can download or
+for the Raspberry Pi 2 and Raspberry Pi 3 which you can download or
 build yourself.
 
 The image is functional and based on the regular Ubuntu `armhf` base,
@@ -228,8 +228,3 @@ BitBucket.
 ### 2015-03-07 - Ubuntu MATE 15.04 for Raspberry Pi 2 Beta 1
 
   * Initial Release.
-
-## TODO
-
-  * Add automatic reszing of the root file system.
-  * Add `raspi-config` or equivilent.
