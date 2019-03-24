@@ -398,6 +398,7 @@ function configure_hardware() {
 
     # Install the Ubuntu port of raspi-config & Raspberry Pi system tweaks
     nspawn apt-get -y install raspi-config raspberrypi-sys-mods
+    nspawn apt-get -y update
     # Enable / partition resize
     nspawn systemctl enable resize-fs.service
 
@@ -414,9 +415,14 @@ function configure_hardware() {
       python3-rpi.gpio \
       wiringpi
 
-    # The pigpio daemon isn't going to work on aarch64 due to mailbox issues
+    # Only available for armhf
     if [ "${ARCHITECTURE}" == "armhf" ]; then
+        # The pigpio daemon isn't going to work on aarch64 due to mailbox issues
         nspawn apt-get -y install pigpio
+        # Install miscellaneous Raspberry Pi utilities EGL/GLES/OpenVG libraries for VideoCore IV
+        nspawn apt-get -y install libraspberrypi-bin libraspberrypi0 
+        # Pre-seed libraries required by SteamLink to streamline the install process.
+        nspawn apt-get -y install libicu57 libjpeg62-turbo
     fi
 
     # Add /boot/firmware/config.txt
@@ -436,12 +442,6 @@ function configure_hardware() {
         echo "dtoverlay=vc4-kms-v3d" >> $R/boot/firmware/config.txt
     else
         nspawn apt-get -y install xserver-xorg-video-fbturbo
-    fi
-
-    # Install miscellaneous Raspberry Pi utilities EGL/GLES/OpenVG libraries for VideoCore IV
-    # Only available for armhf
-    if [ "${ARCHITECTURE}" == "armhf" ]; then
-        nspawn apt-get -y install libraspberrypi-bin libraspberrypi0
     fi
 
     # Create symlinks for config.txt and cmdline.txt in familiar places.
