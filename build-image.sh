@@ -631,7 +631,6 @@ function stage_02_desktop() {
         apt_clean
         rebuild_font_cache
         clean_up
-        make_tarball
         touch "${DESKTOP_R}/tmp/stage_desktop"
     fi
 }
@@ -643,10 +642,6 @@ function stage_03_raspi() {
 
     R="${DEVICE_R}"
     configure_hardware
-    apt_upgrade
-    apt_clean
-    clean_up
-    make_raspi_image
 }
 
 function stage_04_corrections() {
@@ -654,9 +649,9 @@ function stage_04_corrections() {
 
     # Insert other corrections here.
 
+    apt_upgrade
     apt_clean
     clean_up
-    make_raspi_image
 }
 
 function stage_05_images() {
@@ -670,5 +665,5 @@ function stage_05_images() {
 stage_01_base
 stage_02_desktop
 stage_03_raspi
-#stage_04_corrections
-#compress_image
+stage_04_corrections
+stage_05_images
