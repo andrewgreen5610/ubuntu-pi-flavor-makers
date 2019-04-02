@@ -198,9 +198,8 @@ function prepare_oem_config() {
 }
 
 function configure_ssh() {
-    nspawn apt-get -y install openssh-server sshguard
+    nspawn apt-get -y install openssh-server
     nspawn /bin/systemctl disable ssh.service
-    nspawn /bin/systemctl disable sshguard.service
 }
 
 function configure_network() {
