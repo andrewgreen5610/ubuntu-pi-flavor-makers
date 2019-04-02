@@ -448,6 +448,9 @@ function configure_hardware() {
     nspawn ln -s /boot/firmware/config.txt /boot/
     nspawn ln -s /boot/firmware/cmdline.txt /boot/
 
+    # Disable WiFi Power Management
+    sed -i 's/wifi.powersave = 3/wifi.powersave = 2/' $R/etc/NetworkManager/conf.d/default-wifi-powersave-on.conf
+
     # Create swapfile
     fallocate -l 128M $R/swapfile
     chmod 600 $R/swapfile
