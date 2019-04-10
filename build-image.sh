@@ -10,7 +10,7 @@
 #
 ########################################################################
 
-set -x
+set -ex
 
 if [ -f build-settings.sh ]; then
     source build-settings.sh
@@ -39,11 +39,11 @@ function nspawn() {
 
     # Bind mount resolv.conf and the firmware, set the hostname and spawn
     systemd-nspawn \
-      --resolv-conf=off \
       --bind-ro=${BASEDIR}/resolv.conf:/etc/resolv.conf \
       --bind=${R}/boot/firmware:/boot/firmware \
-      --hostname=${FLAVOUR} \
       -D "${R}" "$@"
+#      --hostname=${FLAVOUR} \
+#      --resolv-conf=off \
 }
 
 function nspawn_script() {
@@ -70,20 +70,23 @@ function bootstrap() {
     whois xz-utils
 
     # Use the same base system for all flavours.
-    qemu-debootstrap --verbose --arch=${ARCHITECTURE} ${RELEASE} $R http://ports.ubuntu.com/
+    qemu-debootstrap --verbose --arch=${ARCHITECTURE} ${RELEASE} $R http://ftp.tu-chemnitz.de/pub/linux/ubuntu-ports/
+#http://ports.ubuntu.com/
 }
 
 function generate_locale() {
-    cat <<EOM >$R/usr/local/bin/generate-locale.sh
-#!/usr/bin/env bash
-for LOCALE in $(locale | cut -d'=' -f2 | grep -v : | sed 's/"//g' | uniq); do
-    if [ -n "\$LOCALE" ]; then
-        locale-gen \$LOCALE
-    fi
-done
-EOM
+#    cat <<EOM >$R/usr/local/bin/generate-locale.sh
+##!/usr/bin/env bash
+#for LOCALE in `locale | cut -d'=' -f2 | grep -v : | sed 's/"//g' | uniq`; do
+#    if [ -n "$LOCALE" ]; then
+#        locale-gen $LOCALE
+#    fi
+#done
+#EOM
 
-    nspawn_script generate-locale.sh
+#    nspawn_script generate-locale.sh
+
+    nspawn locale-gen en_US.UTF-8
 }
 
 # Set up initial sources.list
@@ -118,7 +121,9 @@ function ubuntu_standard() {
     nspawn apt-get -y install \
       ubuntu-minimal \
       ubuntu-standard \
-      software-properties-common
+      software-properties-common \
+      fontconfig \
+      network-manager
 }
 
 # Install meta packages
@@ -136,6 +141,21 @@ service dbus stop
 EOM
 
     nspawn_script ${META}.sh
+}
+
+function flaky_apt_install() {
+    set +e
+
+    nspawn apt-get -y install $@
+    RESULT=$?
+    COUNTER=0
+    while [ $RESULT -ne 0 ] && [ $COUNTER -lt 5 ]; do
+        nspawn apt-get -y install $@
+        RESULT=$?
+        COUNTER=$((COUNTER+1))
+    done
+
+    set -e
 }
 
 function create_groups() {
@@ -368,8 +388,10 @@ function rebuild_font_cache() {
     rm -f ${R}/var/cache/fontcache/*
     STAMP=$(date +"%Y-%m-%d %H:%M:%S.0 +0000")
     for FONT_DIR in ${R}/usr/share/fonts ${R}/usr/share/fonts-droid-fallback ${R}/usr/share/fonts-sil-padauk ${R}/usr/local/share/fonts; do
-        find "${FONT_DIR}" -type d -exec touch -a -m --date "${STAMP}" {} \;
-        find "${FONT_DIR}" -type f -exec touch -a -m --date "${STAMP}" {} \;
+        if [ -d "${FONT_DIR}" ]; then
+            find "${FONT_DIR}" -type d -exec touch -a -m --date "${STAMP}" {} \;
+            find "${FONT_DIR}" -type f -exec touch -a -m --date "${STAMP}" {} \;
+        fi
     done
     nspawn env FC_DEBUG=16 fc-cache -frs
 }
@@ -382,8 +404,15 @@ function install_chromium() {
 
 function configure_hardware() {
     # Install the RPi PPA
-    nspawn apt-add-repository --yes --no-update ppa:ubuntu-pi-flavour-makers/ppa
+#    nspawn apt-add-repository --yes --no-update ppa:ubuntu-pi-flavour-makers/ppa
+    nspawn apt-add-repository --yes --no-update ppa:mzanetti/ubuntu-pi-flavor-makers
+    set -e
     nspawn apt-get -y update
+    RESULT=$?
+    while [ $RESULT -ne 0 ]; do
+        nspawn apt-get -y update
+        RESULT=$?
+    done
 
     # Firmware Kernel installation
     nspawn apt-get -y --no-install-recommends install linux-image-raspi2
@@ -396,16 +425,16 @@ function configure_hardware() {
     fi
 
     # Install the Ubuntu port of raspi-config & Raspberry Pi system tweaks
-    nspawn apt-get -y install raspi-config raspberrypi-sys-mods
-    nspawn apt-get -y update
+    flaky_apt_install raspi-config raspberrypi-sys-mods
+    #nspawn apt-get -y update
     # Enable / partition resize
     nspawn systemctl enable resize-fs.service
 
     # Install bluetooth firmware and helpers
-    nspawn apt-get -y install pi-bluetooth
+    flaky_apt_install pi-bluetooth
 
     # Install essential GPIO support
-    nspawn apt-get -y install \
+    flaky_apt_install \
       python-gpiozero \
       python3-gpiozero \
       python-pigpio \
@@ -417,11 +446,11 @@ function configure_hardware() {
     # Only available for armhf
     if [ "${ARCHITECTURE}" == "armhf" ]; then
         # The pigpio daemon isn't going to work on aarch64 due to mailbox issues
-        nspawn apt-get -y install pigpio
+        flaky_apt_install pigpio
         # Install miscellaneous Raspberry Pi utilities EGL/GLES/OpenVG libraries for VideoCore IV
-        nspawn apt-get -y install libraspberrypi-bin libraspberrypi0 
+        flaky_apt_install libraspberrypi-bin libraspberrypi0 
         # Pre-seed libraries required by SteamLink to streamline the install process.
-        nspawn apt-get -y install libicu57 libjpeg62-turbo
+        flaky_apt_install libicu57 libjpeg62-turbo
     fi
 
     # Add /boot/firmware/config.txt
@@ -484,10 +513,10 @@ function clean_up() {
     # Build cruft
     rm -f $R/var/cache/debconf/*-old
     rm -f $R/var/lib/dpkg/*-old
-    truncate -s 0 $R/var/log/faillog
-    truncate -s 0 $R/var/log/installer/debug
-    truncate -s 0 $R/var/log/lastlog
-    truncate -s 0 $R/var/log/syslog
+    truncate -s 0 $R/var/log/faillog || true
+    truncate -s 0 $R/var/log/installer/debug || true
+    truncate -s 0 $R/var/log/lastlog || true
+    truncate -s 0 $R/var/log/syslog || true
 
     # SSH host keys
     rm -f $R/etc/ssh/ssh_host_*key
@@ -577,7 +606,7 @@ function make_hash() {
     if [ -f ${FILE} ]; then
         ${HASH}sum ${FILE} > ${FILE}.${HASH}
         sed -i -r "s/ .*\/(.+)/  \1/g" ${FILE}.${HASH}
-        gpg --default-key ${KEY} --armor --output ${FILE}.${HASH}.sign --detach-sig ${FILE}.${HASH}
+#        gpg --default-key ${KEY} --armor --output ${FILE}.${HASH}.sign --detach-sig ${FILE}.${HASH}
     else
         echo "WARNING! Didn't find ${FILE} to hash."
     fi
@@ -593,7 +622,7 @@ function make_tarball() {
 
 function compress_image() {
     echo "Compressing to: ${BASEDIR}/${IMAGE}.xz"
-    rm "${BASEDIR}/${IMAGE}.xz"
+    rm -f "${BASEDIR}/${IMAGE}.xz"
     xz -T 0 "${BASEDIR}/${IMAGE}"
     make_hash "${BASEDIR}/${IMAGE}.xz"
 }
@@ -650,6 +679,24 @@ function stage_04_corrections() {
     R="${DEVICE_R}"
 
     # Insert other corrections here.
+
+    for PPA in "${ADDITIONAL_PPAS[@]}"; do
+        nspawn apt-add-repository --yes --no-update "${PPA}"
+    done
+
+    for KEY in ${PPA_KEYS}; do
+        nspawn apt-key adv --keyserver keyserver.ubuntu.com --recv-key "${KEY}"
+    done
+
+    nspawn apt-get -y update
+
+    for PACKAGE in ${ADDITIONAL_PACKAGES}; do
+        nspawn apt-get install --yes ${PACKAGE}
+    done
+
+    for SERVICE in ${ENABLE_SERVICES}; do
+        nspawn systemctl enable ${SERVICE}
+    done
 
     apt_upgrade
     apt_clean
