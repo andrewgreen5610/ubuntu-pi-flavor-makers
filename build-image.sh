@@ -219,7 +219,9 @@ function prepare_oem_config() {
 
 function configure_ssh() {
     nspawn apt-get -y install openssh-server
-    nspawn /bin/systemctl disable ssh.service
+#    nspawn /bin/systemctl disable ssh.service
+    cp -a files/sshdgenkeys.service $R/etc/systemd/system/
+    nspawn /bin/systemctl enable sshdgenkeys.service
 }
 
 function configure_network() {
