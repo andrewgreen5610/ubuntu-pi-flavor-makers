@@ -10,7 +10,7 @@
 #
 ########################################################################
 
-set -ex
+set -e
 
 if [ -f build-settings.sh ]; then
     source build-settings.sh
@@ -470,9 +470,12 @@ function configure_hardware() {
     # Enable experimental VC4 (if spedicifed) or install fbturbo drivers
     if [ ${ENABLE_VC4} -eq 1 ]; then
         echo "dtoverlay=vc4-kms-v3d" >> $R/boot/firmware/config.txt
+    elif [ ${ENABLE_FAKE_VC4} -eq 1 ]; then
+        echo "dtoverlay=vc4-fkms-v3d" >> $R/boot/firmware/config.txt
     else
         nspawn apt-get -y install xserver-xorg-video-fbturbo
     fi
+    echo "lcd_rotate=2" >> $R/boot/firmware/config.txt
 
     # Create symlinks for config.txt and cmdline.txt in familiar places.
     nspawn ln -s /boot/firmware/config.txt /boot/
@@ -699,6 +702,10 @@ function stage_04_corrections() {
     for SERVICE in ${ENABLE_SERVICES}; do
         nspawn systemctl enable ${SERVICE}
     done
+
+    if [ ! -z $MOTD_FILE ]; then
+        cp $MOTD_FILE ${R}/etc/motd
+    fi
 
     apt_upgrade
     apt_clean

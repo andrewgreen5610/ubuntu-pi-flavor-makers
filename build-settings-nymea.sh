@@ -27,15 +27,16 @@ MIN_VER="04"
 PNT_VER="2"
 REL_VER="${MAJ_VER}.${MIN_VER}"
 VERSION="${REL_VER}.${PNT_VER}"
-QUALITY="-pre2"
+QUALITY="-pre4"
 ARCHITECTURE="armhf"
-ENABLE_VC4=1
+ENABLE_VC4=0
+ENABLE_FAKE_VC4=1
 META_PACKAGES=""
 STRICT_SNAPS=""
 CLASSIC_SNAPS=""
-ADDITIONAL_PPAS=("deb http://repository.nymea.io ${RELEASE} main")
+ADDITIONAL_PPAS=("deb http://repository.nymea.io ${RELEASE} main" "deb http://ci-repo.nymea.io/landing-silo ${RELEASE} main")
 PPA_KEYS="48232D14F2C6BD8D"
-ADDITIONAL_PACKAGES="nymea nymea-plugins-all nymea-networkmanager net-tools"
+ADDITIONAL_PACKAGES="nymea nymea-plugins nymea-plugins-maker nymea-networkmanager nymea-app-kiosk net-tools"
 ENABLE_SERVICES="nymead nymea-networkmanager"
 
 # Either 'ext4' or 'f2fs'
@@ -72,3 +73,5 @@ BASE_R=${BASEDIR}/base
 DESKTOP_R=${BUILDDIR}/desktop
 DEVICE_R=${BUILDDIR}/pi
 export TZ=UTC
+
+MOTD_FILE=motd-nymea
