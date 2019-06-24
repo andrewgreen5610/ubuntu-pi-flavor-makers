@@ -65,13 +65,14 @@ elif [ "${ARCHITECTURE}" == "arm64" ]; then
     SUB_ARCH="raspi3"
 fi
 
+export TZ=UTC
+STAMP=`date '+%Y%m%d%H%M'`
 TARBALL="${FLAVOUR}-${VERSION}${QUALITY}-nymea-${ARCHITECTURE}+${SUB_ARCH}.tar.xz"
-IMAGE="${FLAVOUR}-${VERSION}${QUALITY}-nymea-${ARCHITECTURE}+${SUB_ARCH}-${FS_TYPE}.img"
+IMAGE="nymea-ubuntu-${VERSION}${QUALITY}-${STAMP}-${ARCHITECTURE}+${SUB_ARCH}.img"
 BASEDIR=${PWD}/output/${RELEASE}/${ARCHITECTURE}
 BUILDDIR=${BASEDIR}/${FLAVOUR}
 BASE_R=${BASEDIR}/base
 DESKTOP_R=${BUILDDIR}/desktop
 DEVICE_R=${BUILDDIR}/pi
-export TZ=UTC
 
 MOTD_FILE=motd-nymea
