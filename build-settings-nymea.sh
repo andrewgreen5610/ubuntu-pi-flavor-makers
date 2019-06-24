@@ -34,9 +34,9 @@ ENABLE_FAKE_VC4=1
 META_PACKAGES=""
 STRICT_SNAPS=""
 CLASSIC_SNAPS=""
+ADDITIONAL_PPAS=("deb http://repository.nymea.io ${RELEASE} main")
 # Enable this to build an image from testing
 #ADDITIONAL_PPAS=("deb http://repository.nymea.io ${RELEASE} main" "deb http://ci-repo.nymea.io/landing-silo ${RELEASE} main")
-ADDITIONAL_PPAS=()
 PPA_KEYS="48232D14F2C6BD8D"
 ADDITIONAL_PACKAGES="nymea nymea-plugins nymea-plugins-maker nymea-networkmanager nymea-app-kiosk net-tools"
 ENABLE_SERVICES="nymead nymea-networkmanager"
